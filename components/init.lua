@@ -1,7 +1,7 @@
 local components = {}
 local componentNames = {
     "Window", "Button", "Toggle", "Slider", "Label",
-    "TextField", "Stepper", "Notification", "Icon", "Page", "Row"
+    "TextField", "Stepper", "Notification", "Icon", "Page", "Row", "EditMenu"
 }
 for _, name in ipairs(componentNames) do
     local mod = _G["__unaliveui_components_" .. name]

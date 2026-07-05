@@ -1,5 +1,4 @@
 local create = _G.__unaliveui_creator.Create
-
 return function(self, props)
     props = props or {}
     local frame = create("ScrollingFrame")({
@@ -14,7 +13,7 @@ return function(self, props)
     })
     local s = { Frame = frame, Layout = frame.__instance:FindFirstChild("Layout") }
     local obj = { Type = "Page", Theme = self and self.Theme, Structures = s, __instance = frame.__instance }
-    obj.Parent = function(p) frame.Parent = p end
+    function obj.Parent(p) frame.Parent = p end
     obj.__container = frame.__instance
     return obj
 end
