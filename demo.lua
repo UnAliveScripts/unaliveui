@@ -1,4 +1,4 @@
--- UnaliveUI Figma Demo (Final)
+-- UnaliveUI Figma Demo
 -- Load: loadstring(game:HttpGet("https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/demo.lua"))()
 
 local TS = game:GetService("TweenService")
@@ -9,26 +9,25 @@ local icons = { UnAlivelogo = "rbxassetid://127922205331150" }
 
 local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 local gui = Instance.new("ScreenGui"); gui.Name = "UnaliveUIDemo"
-gui.ResetOnSpawn = false; gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling; gui.DisplayOrder = 200; gui.Parent = playerGui
+gui.ResetOnSpawn = false; gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.DisplayOrder = 200; gui.IgnoreGuiInset = true; gui.Parent = playerGui
 
 local function IsNotNaN(x) return x == x end
-
-local root = Instance.new("Folder", camera)
 local MTREL = "Glass"; local wedgeguid = HS:GenerateGUID(true)
-root.Name = HS:GenerateGUID(true)
+local root = Instance.new("Folder", camera); root.Name = HS:GenerateGUID(true)
 
 local DepthOfField
 for _,v in pairs(game:GetService("Lighting"):GetChildren()) do
     if not v:IsA("DepthOfFieldEffect") and v:HasTag(".") then
         DepthOfField = Instance.new("DepthOfFieldEffect", game:GetService("Lighting"))
-        DepthOfField.FarIntensity = 0; DepthOfField.FocusDistance = 51.6; DepthOfField.InFocusRadius = 50
-        DepthOfField.NearIntensity = 1; DepthOfField.Name = HS:GenerateGUID(true); DepthOfField:AddTag(".")
+        DepthOfField.FarIntensity = 0; DepthOfField.NearIntensity = 1; DepthOfField.InFocusRadius = 0.1
+        DepthOfField.Name = HS:GenerateGUID(true); DepthOfField:AddTag(".")
     elseif v:IsA("DepthOfFieldEffect") and v:HasTag(".") then DepthOfField = v end
 end
 if not DepthOfField then
     DepthOfField = Instance.new("DepthOfFieldEffect", game:GetService("Lighting"))
-    DepthOfField.FarIntensity = 0; DepthOfField.FocusDistance = 51.6; DepthOfField.InFocusRadius = 50
-    DepthOfField.NearIntensity = 1; DepthOfField.Name = HS:GenerateGUID(true); DepthOfField:AddTag(".")
+    DepthOfField.FarIntensity = 0; DepthOfField.NearIntensity = 1; DepthOfField.InFocusRadius = 0.1
+    DepthOfField.Name = HS:GenerateGUID(true); DepthOfField:AddTag(".")
 end
 while not IsNotNaN(camera:ScreenPointToRay(0,0).Origin.x) do RS.RenderStepped:Wait() end
 
@@ -56,21 +55,49 @@ local function DrawTriangle(v1, v2, v3, p0, p1)
     return p0, p1
 end
 local function DrawQuad(v1,v2,v3,v4,pts) pts[1],pts[2]=DrawTriangle(v1,v2,v3,pts[1],pts[2]); pts[3],pts[4]=DrawTriangle(v3,v2,v4,pts[3],pts[4]) end
-local function applyBlur(fo)
-    local pts={}; local f=Instance.new("Folder",root); f.Name=HS:GenerateGUID(true)
-    local pars={}; (function() local function ad(c) if c:IsA("GuiObject") then table.insert(pars,c); ad(c.Parent) end end; ad(fo) end)()
-    local function vis(i) while i do if i:IsA("GuiObject") and not i.Visible then return false end; if i:IsA("ScreenGui") and not i.Enabled then return false end; i=i.Parent end; return true end
-    local function up(fp)
-        if not vis(fo) then for _,pt in pairs(pts) do pt.Parent=nil end; return end
-        local tl,br = fo.AbsolutePosition, fo.AbsolutePosition+fo.AbsoluteSize; local tr,bl = Vector2.new(br.x,tl.y), Vector2.new(tl.x,br.y); local rot=0
-        for _,v in ipairs(pars) do rot=rot+v.Rotation end
-        if rot~=0 and rot%180~=0 then local mid=tl:lerp(br,0.5); local s,c2=math.sin(math.rad(rot)),math.cos(math.rad(rot))
-            tl=Vector2.new(c2*(tl.x-mid.x)-s*(tl.y-mid.y),s*(tl.x-mid.x)+c2*(tl.y-mid.y))+mid; tr=Vector2.new(c2*(tr.x-mid.x)-s*(tr.y-mid.y),s*(tr.x-mid.x)+c2*(tr.y-mid.y))+mid; bl=Vector2.new(c2*(bl.x-mid.x)-s*(bl.y-mid.y),s*(bl.x-mid.x)+c2*(bl.y-mid.y))+mid; br=Vector2.new(c2*(br.x-mid.x)-s*(br.y-mid.y),s*(br.x-mid.x)+c2*(br.y-mid.y))+mid end
-        local z=1-0.05*fo.ZIndex
-        DrawQuad(camera:ScreenPointToRay(tl.x,tl.y,z).Origin,camera:ScreenPointToRay(tr.x,tr.y,z).Origin,camera:ScreenPointToRay(bl.x,bl.y,z).Origin,camera:ScreenPointToRay(br.x,br.y,z).Origin,pts)
-        if fp then for _,pt in pairs(pts) do pt.Parent=f end; for _,pt in pairs(pts) do pt.Transparency=0.98; pt.BrickColor=BrickColor.new("Institutional white") end end
-    end; up(true); RS:BindToRenderStep(HS:GenerateGUID(true),2000,up); return f
+
+local function createBlur(frame)
+    local dist = 0.001; local bf = Instance.new("Folder",camera); bf.Name=HS:GenerateGUID(true)
+    local conn={}; local tp={topLeft=Vector2.new(),topRight=Vector2.new(),bottomRight=Vector2.new()}
+    local pt=Instance.new("Part"); pt.Color=Color3.new(0,0,0); pt.Material=Enum.Material.Glass
+    pt.Size=Vector3.new(1,1,0); pt.Anchored=true; pt.CanTouch=false; pt.CanCollide=false; pt.CanQuery=false
+    pt.Locked=true; pt.CastShadow=false; pt.Transparency=0.98
+    local mesh=Instance.new("SpecialMesh"); mesh.MeshType=Enum.MeshType.Brick; mesh.Offset=Vector3.new(0,0,-0.000001); mesh.Parent=pt
+    local dof=Instance.new("DepthOfFieldEffect",game:GetService("Lighting"))
+    dof.FarIntensity=0; dof.NearIntensity=1; dof.InFocusRadius=0.1
+    local function ups(sz,pos) tp.topLeft=pos; tp.topRight=pos+Vector2.new(sz.X,0); tp.bottomRight=pos+sz end
+    local function rnd()
+        local cam=workspace.CurrentCamera; if not cam then return end
+        local tl=cam:ScreenPointToRay(tp.topLeft.X,tp.topLeft.Y).Origin+cam.CFrame.LookVector*dist
+        local tr=cam:ScreenPointToRay(tp.topRight.X,tp.topRight.Y).Origin+cam.CFrame.LookVector*dist
+        local br=cam:ScreenPointToRay(tp.bottomRight.X,tp.bottomRight.Y).Origin+cam.CFrame.LookVector*dist
+        local w=(tr-tl).Magnitude; local h=(tr-br).Magnitude
+        pt.CFrame=CFrame.fromMatrix((tl+br)/2,cam.CFrame.XVector,cam.CFrame.YVector,cam.CFrame.ZVector)
+        mesh.Scale=Vector3.new(w,h,0)
+    end
+    local function oc(rbx) local sz=rbx.AbsoluteSize; local pos=rbx.AbsolutePosition; ups(sz,pos); task.spawn(rnd) end
+    pt.Parent=bf
+    pt.Destroying:Connect(function() for _,c in conn do pcall(function() c:Disconnect() end) end; pcall(function() dof:Destroy() end); pcall(function() bf:Destroy() end) end)
+    local cam=workspace.CurrentCamera
+    if cam then conn[#conn+1]=cam:GetPropertyChangedSignal("CFrame"):Connect(rnd); conn[#conn+1]=cam:GetPropertyChangedSignal("ViewportSize"):Connect(rnd); conn[#conn+1]=cam:GetPropertyChangedSignal("FieldOfView"):Connect(rnd) end
+    frame:GetPropertyChangedSignal("AbsolutePosition"):Connect(function() oc(frame) end)
+    frame:GetPropertyChangedSignal("AbsoluteSize"):Connect(function() oc(frame) end)
+    frame.Destroying:Connect(function() pt:Destroy() end); oc(frame); task.spawn(rnd)
 end
+
+-- WINDOW PILL (Cascade exact)
+local pill = Instance.new("ImageButton"); pill.Name = "WindowPill"
+pill.AnchorPoint = Vector2.new(0.5, 0); pill.AutoButtonColor = false
+pill.BackgroundTransparency = 1; pill.BorderSizePixel = 0
+pill.Image = "rbxassetid://93520763686656"; pill.ImageTransparency = 0.5
+pill.ImageColor3 = Color3.fromRGB(245,245,245)
+pill.Position = UDim2.new(0.5, 0, 0, 10); pill.Size = UDim2.fromOffset(180, 5)
+pill.ZIndex = 999; pill.Parent = gui
+local pcor = Instance.new("UICorner"); pcor.CornerRadius = UDim.new(1,0); pcor.Parent = pill
+local ti = TweenInfo.new(0.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+local ct = nil
+pill.MouseEnter:Connect(function() if ct then ct:Cancel() end; ct=TS:Create(pill,ti,{ImageTransparency=0.15}); ct:Play() end)
+pill.MouseLeave:Connect(function() if ct then ct:Cancel() end; ct=TS:Create(pill,ti,{ImageTransparency=0.5}); ct:Play() end)
 
 -- NOTIFICATION
 local n = Instance.new("Frame"); n.Name = "Notification"
@@ -85,9 +112,14 @@ sh.BorderSizePixel = 0; sh.ZIndex = -1; sh.Parent = n
 local shc = Instance.new("UICorner"); shc.CornerRadius = UDim.new(0, 24); shc.Parent = sh
 
 local cv = Instance.new("Frame"); cv.Size = UDim2.fromScale(1,1)
-cv.BackgroundColor3 = Color3.fromRGB(18,20,26); cv.BackgroundTransparency = 0.15
+cv.BackgroundColor3 = Color3.fromRGB(18,20,26); cv.BackgroundTransparency = 0.08
 cv.BorderSizePixel = 0; cv.ZIndex = 1; cv.Parent = n
 local cvc = Instance.new("UICorner"); cvc.CornerRadius = UDim.new(0, 24); cvc.Parent = cv
+
+local bf = Instance.new("Frame"); bf.Size = UDim2.new(1,-24,1,-24)
+bf.Position = UDim2.fromOffset(12,12); bf.BackgroundTransparency = 1
+bf.BorderSizePixel = 0; bf.ZIndex = 0; bf.Parent = n
+local bfc = Instance.new("UICorner"); bfc.CornerRadius = UDim.new(0,24); bfc.Parent = bf; createBlur(bf)
 
 local icon = Instance.new("ImageLabel"); icon.Size = UDim2.fromOffset(38,38); icon.Position = UDim2.fromOffset(14,13)
 icon.BackgroundTransparency = 1; icon.BorderSizePixel = 0; icon.Image = icons.UnAlivelogo; icon.ZIndex = 3; icon.Parent = n
@@ -95,7 +127,7 @@ local icr = Instance.new("UICorner"); icr.CornerRadius = UDim.new(0,10); icr.Par
 
 local title = Instance.new("TextLabel"); title.Size = UDim2.fromOffset(274,17); title.Position = UDim2.fromOffset(62,12)
 title.BackgroundTransparency = 1; title.BorderSizePixel = 0
-title.FontFace = Font.new("rbxassetid://12187365364",Enum.FontWeight.Bold)
+title.FontFace = Font.new("rbxassetid://12187365364",Enum.FontWeight.SemiBold)
 title.Text = "UnAlive"; title.TextSize = 15; title.TextColor3 = Color3.fromRGB(255,255,255)
 title.TextXAlignment = Enum.TextXAlignment.Left; title.TextYAlignment = Enum.TextYAlignment.Top; title.RichText = true; title.ZIndex = 3; title.Parent = n
 
@@ -119,15 +151,20 @@ m.BackgroundTransparency = 1; m.BorderSizePixel = 0; m.ZIndex = 20; m.Parent = g
 local mc2 = Instance.new("UICorner"); mc2.CornerRadius = UDim.new(0,34); mc2.Parent = m
 
 local sh2 = Instance.new("Frame"); sh2.Name = "Shadow"
-sh2.Size = UDim2.new(1, 4, 1, 4); sh2.Position = UDim2.fromOffset(-2, -2)
+sh2.Size = UDim2.new(1,4,1,4); sh2.Position = UDim2.fromOffset(-2,-2)
 sh2.BackgroundColor3 = Color3.fromRGB(0,0,0); sh2.BackgroundTransparency = 0.82
 sh2.BorderSizePixel = 0; sh2.ZIndex = -1; sh2.Parent = m
 local sh2c = Instance.new("UICorner"); sh2c.CornerRadius = UDim.new(0,34); sh2c.Parent = sh2
 
 local c2 = Instance.new("Frame"); c2.Size = UDim2.fromScale(1,1)
-c2.BackgroundColor3 = Color3.fromRGB(15,17,22); c2.BackgroundTransparency = 0.2
+c2.BackgroundColor3 = Color3.fromRGB(15,17,22); c2.BackgroundTransparency = 0.08
 c2.BorderSizePixel = 0; c2.ZIndex = 1; c2.Parent = m
 local c2c = Instance.new("UICorner"); c2c.CornerRadius = UDim.new(0,34); c2c.Parent = c2
+
+local bf2 = Instance.new("Frame"); bf2.Size = UDim2.new(1,-34,1,-34)
+bf2.Position = UDim2.fromOffset(17,17); bf2.BackgroundTransparency = 1
+bf2.BorderSizePixel = 0; bf2.ZIndex = 0; bf2.Parent = m
+local bf2c = Instance.new("UICorner"); bf2c.CornerRadius = UDim.new(0,34); bf2c.Parent = bf2; createBlur(bf2)
 
 local mc = Instance.new("Frame"); mc.Size = UDim2.fromScale(1,1); mc.BackgroundTransparency = 1; mc.BorderSizePixel = 0; mc.ZIndex = 3; mc.Parent = m
 local ml = Instance.new("UIListLayout"); ml.FillDirection = Enum.FillDirection.Horizontal; ml.VerticalAlignment = Enum.VerticalAlignment.Center; ml.Padding = UDim.new(0,0); ml.Parent = mc
@@ -147,12 +184,11 @@ ind.BackgroundColor3 = Color3.fromRGB(18,18,18); ind.BorderSizePixel = 0; ind.Pa
 local ic2 = Instance.new("UICorner"); ic2.CornerRadius = UDim.new(1,0); ic2.Parent = ind
 
 local ch = Instance.new("ImageLabel")
-ch.Size = UDim2.fromOffset(26, 26); ch.Position = UDim2.fromOffset(7, 5)
+ch.Size = UDim2.fromOffset(26,26); ch.Position = UDim2.fromOffset(7,5)
 ch.BackgroundTransparency = 1; ch.BorderSizePixel = 0
-ch.Image = "rbxassetid://103603118195781"
-ch.ImageColor3 = Color3.fromRGB(245,245,245)
+ch.Image = "rbxassetid://103603118195781"; ch.ImageColor3 = Color3.fromRGB(245,245,245)
 ch.ScaleType = Enum.ScaleType.Fit; ch.Parent = ind
 
 TS:Create(m, TweenInfo.new(0.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), { Position = UDim2.new(0.5,-244,0.5,-22) }):Play()
-print("=== UnaliveUI Final Demo Loaded ===")
+print("=== UnaliveUI Final Demo ===")
 return { Notification = n, EditMenu = m }
