@@ -1,77 +1,105 @@
--- Figma-accurate Notification component
--- From Figma: 386x64, 24px corner radius, Clear Glass, icon + Title + Description
 local TweenService = game:GetService("TweenService")
 local create = _G.__unaliveui_creator.Create
 local icons = _G.__unaliveui_icons or {}
 
 return function(self, props)
     props = props or {}
-    props.Title = props.Title or "UnAlive"
-    props.Description = props.Description or "Welcome to UnAlive"
-    props.Duration = props.Duration or 5
-    props.Icon = props.Icon or icons.UnAlivelogo
+    props.Title = props.Title or "Notification"
+    props.Subtitle = props.Subtitle or ""
+    props.Duration = props.Duration or 6
+
+    local parent = self.__container or self.__instance or self
+    local theme = self.Theme.Controls.Notification
+    local structures = {}
 
     local body = create("Frame")({
-        Name = "Notification", BackgroundTransparency = 1, BorderSizePixel = 0,
-        Size = UDim2.fromOffset(386, 64), ZIndex = 100,
-
-        create("Frame")({ Name = "Shadow", Visible = false,
-            BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.8,
-            BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), ZIndex = 0,
-            create("UICorner")({ CornerRadius = UDim.new(0, 24) }),
-        }),
-
-        create("Frame")({
-            Name = "Glass", BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-            BackgroundTransparency = 0.92, BorderSizePixel = 0,
-            Size = UDim2.fromScale(1, 1), ZIndex = 1,
-            create("UICorner")({ CornerRadius = UDim.new(0, 24) }),
-            create("UIStroke")({ Color = Color3.fromRGB(80, 80, 90), Transparency = 0.6, Thickness = 0.5 }),
-        }),
+        Name = "Notification",
+        AnchorPoint = Vector2.new(1, 1),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        BackgroundTransparency = 1, BorderSizePixel = 0,
+        Position = UDim2.new(1, -12, 1, -12),
+        Size = UDim2.fromOffset(325, 0),
+        Parent = parent,
 
         create("Frame")({
-            Name = "Content", BackgroundTransparency = 1, BorderSizePixel = 0,
-            Size = UDim2.fromScale(1, 1), ZIndex = 2,
-            create("ImageLabel")({ Name = "Icon", BackgroundTransparency = 1, BorderSizePixel = 0,
-                Image = props.Icon, Position = UDim2.fromOffset(16, 20),
-                Size = UDim2.fromOffset(24, 24), ZIndex = 3 }),
-            create("TextLabel")({ Name = "Title", BackgroundTransparency = 1,
-                FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold),
-                Text = props.Title, TextSize = 15, TextColor3 = Color3.fromRGB(255, 255, 255),
-                Position = UDim2.fromOffset(52, 12), Size = UDim2.new(0, 300, 0, 20),
-                TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 3 }),
-            create("TextLabel")({ Name = "Description", BackgroundTransparency = 1,
-                FontFace = Font.new("rbxassetid://12187365364"),
-                Text = props.Description, TextSize = 13,
-                TextColor3 = Color3.fromRGB(180, 180, 190),
-                Position = UDim2.fromOffset(52, 34), Size = UDim2.new(0, 300, 0, 18),
-                TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 3 }),
-            create("ImageButton")({ Name = "Close", BackgroundTransparency = 1,
-                Image = icons.xmark, ImageColor3 = Color3.fromRGB(180, 180, 190),
-                Position = UDim2.new(1, -36, 0, 12), Size = UDim2.fromOffset(16, 16), ZIndex = 4 }),
+            Name = "Canvas", AnchorPoint = Vector2.new(0, 0),
+            AutomaticSize = Enum.AutomaticSize.Y, Size = UDim2.fromScale(1, 0),
+            BorderSizePixel = 0,
+            __dynamicKeys = { BackgroundColor3 = theme.Background[1], BackgroundTransparency = theme.Background[2] },
+            create("UICorner")({ CornerRadius = UDim.new(0, 12) }),
+            create("UIStroke")({ ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                __dynamicKeys = { Color = theme.Border[1], Transparency = theme.Border[2] } }),
+            create("UIListLayout")({ Padding = UDim.new(0, 5), SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Center }),
+            create("UIPadding")({ PaddingBottom = UDim.new(0, 12), PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12), PaddingTop = UDim.new(0, 12) }),
         }),
     })
 
-    body.Position = UDim2.new(1, 50, 1, 0)
-    task.wait(0.05)
-    TweenService:Create(body.__instance, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.new(1, -420, 1, 0) }):Play()
+    structures.Body = body.__instance; structures.Canvas = body.__instance:FindFirstChild("Canvas")
 
-    local closeBtn = body.__instance:FindFirstChild("Content"):FindFirstChild("Close")
+    local content = Instance.new("Frame")
+    content.Name = "Content"; content.BackgroundTransparency = 1; content.BorderSizePixel = 0
+    content.AutomaticSize = Enum.AutomaticSize.Y; content.Size = UDim2.fromScale(1, 0); content.LayoutOrder = 1; content.Parent = structures.Canvas
+
+    local titleContainer = Instance.new("Frame")
+    titleContainer.Name = "TitleContainer"; titleContainer.BackgroundTransparency = 1; titleContainer.BorderSizePixel = 0
+    titleContainer.AutomaticSize = Enum.AutomaticSize.XY; titleContainer.Size = UDim2.fromScale(1, 0); titleContainer.Parent = content
+
+    local titleLayout = Instance.new("UIListLayout")
+    titleLayout.FillDirection = Enum.FillDirection.Horizontal; titleLayout.Padding = UDim.new(0, 5)
+    titleLayout.SortOrder = Enum.SortOrder.LayoutOrder; titleLayout.VerticalAlignment = Enum.VerticalAlignment.Center; titleLayout.Parent = titleContainer
+
+    local icon = Instance.new("ImageLabel")
+    icon.Name = "Icon"; icon.BackgroundTransparency = 1; icon.BorderSizePixel = 0
+    icon.LayoutOrder = 1; icon.Size = UDim2.fromOffset(18, 18); icon.Visible = false; icon.Parent = titleContainer
+
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"; title.BackgroundTransparency = 1; title.BorderSizePixel = 0
+    title.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold); title.LineHeight = 0
+    title.Size = UDim2.new(1, 0, 0, 20); title.Text = props.Title; title.TextSize = 13
+    title.TextWrapped = true; title.RichText = true; title.TextXAlignment = Enum.TextXAlignment.Left
+    title.LayoutOrder = 2; title.AutomaticSize = Enum.AutomaticSize.Y; title.Parent = titleContainer
+
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Name = "Subtitle"; subtitle.BackgroundTransparency = 1; subtitle.BorderSizePixel = 0
+    subtitle.FontFace = Font.new("rbxassetid://12187365364"); subtitle.LayoutOrder = 1
+    subtitle.RichText = true; subtitle.Size = UDim2.fromScale(1, 0); subtitle.Text = props.Subtitle
+    subtitle.TextSize = 13; subtitle.TextWrapped = true; subtitle.TextXAlignment = Enum.TextXAlignment.Left
+    subtitle.AutomaticSize = Enum.AutomaticSize.Y; subtitle.Visible = props.Subtitle ~= ""; subtitle.Parent = content
+
+    local exitBtn = Instance.new("ImageButton")
+    exitBtn.Name = "Exit"; exitBtn.AutoButtonColor = false; exitBtn.BackgroundTransparency = 1
+    exitBtn.BorderSizePixel = 0; exitBtn.Image = "rbxassetid://15814246897"
+    exitBtn.Size = UDim2.fromOffset(18, 18); exitBtn.LayoutOrder = 2; exitBtn.Parent = structures.Canvas
+
+    local exitIcon = Instance.new("ImageLabel")
+    exitIcon.Name = "Icon"; exitIcon.BackgroundTransparency = 1; exitIcon.BorderSizePixel = 0
+    exitIcon.Image = icons.xmark; exitIcon.Size = UDim2.fromOffset(10, 10)
+    exitIcon.AnchorPoint = Vector2.new(0.5, 0.5); exitIcon.Position = UDim2.fromScale(0.5, 0.5)
+    exitIcon.Parent = exitBtn
+
+    local exitStroke = Instance.new("UIStroke")
+    exitStroke.Name = "Stroke"; exitStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    exitStroke.Transparency = 0.96; exitStroke.Parent = exitBtn
+
+    body.Position = UDim2.new(1, 187.5, 1, 0)
+    TweenService:Create(body.__instance, TweenInfo.new(0.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), { Position = UDim2.new(1, -12, 1, -12) }):Play()
+
+    local closed = false
     local function closeNotification()
-        TweenService:Create(body.__instance, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Position = UDim2.new(1, 50, 1, 0), BackgroundTransparency = 1 }):Play()
-        task.delay(0.45, function() pcall(function() if props.Closed then props.Closed() end; body.__instance:Destroy() end) end)
+        if closed then return end; closed = true
+        if props.Closed then task.spawn(props.Closed) end
+        TweenService:Create(body.__instance, TweenInfo.new(0.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), { Position = body.Position + UDim2.fromOffset(350, 0) }):Play()
+        task.delay(0.4, function() if body.__instance and body.__instance.Parent then body.__instance:Destroy() end end)
     end
 
-    closeBtn.MouseButton1Click:Connect(closeNotification)
-
+    exitBtn.MouseButton1Click:Connect(closeNotification)
     if props.Duration and props.Duration > 0 then
         task.delay(props.Duration, function() if body.__instance and body.__instance.Parent then closeNotification() end end)
     end
 
-    local obj = { Type = "Notification", Theme = self and self.Theme, __instance = body.__instance }
-    function obj:Close() closeNotification() end
-    function obj.Parent(p) body.Parent = p end
-    function obj:SetTitle(text) body.__instance:FindFirstChild("Content"):FindFirstChild("Title").Text = text end
-    function obj:SetDescription(text) body.__instance:FindFirstChild("Content"):FindFirstChild("Description").Text = text end
-    return obj
+    local object = { Type = "Notification", Theme = self.Theme, Structures = structures, __instance = body.__instance }
+    function object:Close() closeNotification() end
+    function object:SetTitle(v) title.Text = v end
+    function object:SetSubtitle(v) subtitle.Text = v; subtitle.Visible = v ~= "" end
+    return object
 end

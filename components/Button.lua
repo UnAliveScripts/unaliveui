@@ -1,5 +1,3 @@
--- Figma-accurate Button component
--- States: Primary, Secondary, Destructive
 local TweenService = game:GetService("TweenService")
 local create = _G.__unaliveui_creator.Create
 
@@ -8,86 +6,86 @@ return function(self, props)
     props.State = props.State or "Primary"
     props.Label = props.Label or "Button"
 
-    local overlay, labelObj, gradient
+    local parent = self.__container or self.__instance or self
+    local theme = self.Theme.Controls.Button
+    local structures = {}
 
-    local body = create("TextButton")({
+    structures.Body = create("TextButton")({
         Name = "Button", AutoButtonColor = false,
         AutomaticSize = Enum.AutomaticSize.XY,
-        BackgroundTransparency = 1, BorderSizePixel = 0, Text = "",
-        Size = UDim2.fromOffset(0, 32),
-    })
-
-    gradient = create("UIGradient")({
-        Name = "Fill", Rotation = 90,
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(66, 66, 72)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 50, 56)),
-        }), Parent = body.__instance,
-    })
-
-    create("UICorner")({ CornerRadius = UDim.new(1, 0) }).Parent = body.__instance
-
-    overlay = create("Frame")({
-        Name = "PressOverlay", BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BackgroundTransparency = 1, BorderSizePixel = 0,
-        Size = UDim2.fromScale(1, 1), ZIndex = 2, Parent = body.__instance,
-        create("UICorner")({ CornerRadius = UDim.new(1, 0) }),
-    })
+        Text = "", Parent = parent,
 
-    labelObj = create("TextLabel")({
-        Name = "Label", AutomaticSize = Enum.AutomaticSize.XY,
-        BackgroundTransparency = 1, BorderSizePixel = 0,
-        FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium),
-        RichText = true, Text = props.Label, TextSize = 13,
-        TextColor3 = Color3.fromRGB(255, 255, 255), TextWrapped = true,
-        TextXAlignment = Enum.TextXAlignment.Center,
-        TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 3, Parent = body.__instance,
-        create("UIPadding")({
-            PaddingBottom = UDim.new(0, 3), PaddingLeft = UDim.new(0, 8),
-            PaddingRight = UDim.new(0, 8), PaddingTop = UDim.new(0, 3),
+        create("UICorner")({ CornerRadius = UDim.new(0, 5) }),
+        create("Frame")({ Name = "ShadowLayer1", BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BackgroundTransparency = 1, BorderSizePixel = 0,
+            Size = UDim2.fromScale(1, 1), ZIndex = 0,
+            create("UICorner")({ CornerRadius = UDim.new(0, 5) }),
+            create("UIStroke")({ Name = "Shadow", ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                Transparency = 0.95, __dynamicKeys = { Color = theme.Shadow } }),
+        }),
+        create("Frame")({ Name = "ShadowLayer2", BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BackgroundTransparency = 1, BorderSizePixel = 0,
+            Size = UDim2.fromScale(1, 1), ZIndex = -1,
+            create("UICorner")({ CornerRadius = UDim.new(0, 5) }),
+            create("UIStroke")({ Name = "Shadow", ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                Thickness = 2, Transparency = 0.98, __dynamicKeys = { Color = theme.Shadow } }),
+        }),
+        create("Frame")({ Name = "PressOverlay",
+            BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+            BackgroundTransparency = 1, BorderSizePixel = 0,
+            Size = UDim2.fromScale(1, 1), ZIndex = 2,
+            create("UICorner")({ CornerRadius = UDim.new(0, 5) }),
         }),
     })
 
-    local function applyState()
-        if props.State == "Destructive" then
-            gradient.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 50, 40)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 40, 30)),
-            })
-            labelObj.TextColor3 = Color3.fromRGB(255, 255, 255)
-        elseif props.State == "Secondary" then
-            gradient.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(44, 44, 50)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(38, 38, 44)),
-            })
-            labelObj.TextColor3 = Color3.fromRGB(200, 200, 210)
-        else
-            gradient.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(66, 66, 72)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 50, 56)),
-            })
-            labelObj.TextColor3 = Color3.fromRGB(255, 255, 255)
-        end
-    end
-    applyState()
+    structures.Shadow1 = structures.Body.__instance:FindFirstChild("ShadowLayer1"):FindFirstChild("Shadow")
+    structures.Shadow2 = structures.Body.__instance:FindFirstChild("ShadowLayer2"):FindFirstChild("Shadow")
+    structures.PressOverlay = structures.Body.__instance:FindFirstChild("PressOverlay")
+
+    structures.Label = create("TextLabel")({
+        Size = UDim2.fromScale(1, 1), Name = "Label",
+        AutomaticSize = Enum.AutomaticSize.XY,
+        BackgroundTransparency = 1, BorderSizePixel = 0,
+        FontFace = Font.new("rbxassetid://12187365364"),
+        RichText = true, TextSize = 14, TextWrapped = true,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        TextYAlignment = Enum.TextYAlignment.Center,
+        Parent = structures.Body.__instance,
+        __dynamicKeys = {
+            TextColor3 = self.Theme.Text.SelectionPrimary[1],
+            TextTransparency = self.Theme.Text.SelectionPrimary[2],
+        },
+        create("UIPadding")({
+            PaddingBottom = UDim.new(0, 3), PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7), PaddingTop = UDim.new(0, 3),
+        }),
+    })
+
+    structures.Fill = create("UIGradient")({
+        Name = "Fill", Rotation = 90, Parent = structures.Body.__instance,
+        __dynamicKeys = { Color = theme.FillPrimary },
+    })
+
+    structures.Label.TextColor3 = props.State == "Primary" and self.Theme.Text.SelectionPrimary[1].Value or props.State == "Secondary" and self.Theme.Text.Primary[1].Value or self.Theme.Accents.Red[1].Value
+    structures.Label.TextTransparency = props.State == "Primary" and self.Theme.Text.SelectionPrimary[2].Value or props.State == "Secondary" and self.Theme.Text.Primary[2].Value or self.Theme.Accents.Red[2].Value
+    if props.Label then structures.Label.Text = props.Label end
 
     local function animatePress()
-        TweenService:Create(overlay.__instance, TweenInfo.new(0.08, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { BackgroundTransparency = 0.75 }):Play()
-        TweenService:Create(body.__instance, TweenInfo.new(0.08, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(body.AbsoluteSize.X, 30) }):Play()
+        TweenService:Create(structures.PressOverlay, TweenInfo.new(0.12, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { BackgroundTransparency = 0.8 }):Play()
     end
     local function animateRelease()
-        TweenService:Create(overlay.__instance, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
-        TweenService:Create(body.__instance, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(body.AbsoluteSize.X, 32) }):Play()
+        TweenService:Create(structures.PressOverlay, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
     end
 
-    body.MouseButton1Down:Connect(animatePress)
-    body.MouseButton1Up:Connect(animateRelease)
-    body.MouseLeave:Connect(animateRelease)
-    body.MouseButton1Click:Connect(function() if props.Pushed then task.spawn(props.Pushed, obj) end end)
+    structures.Body.MouseButton1Down:Connect(animatePress)
+    structures.Body.MouseButton1Up:Connect(animateRelease)
+    structures.Body.MouseLeave:Connect(animateRelease)
+    structures.Body.MouseButton1Click:Connect(function() if props.Pushed then task.spawn(props.Pushed, object) end end)
 
-    local obj = { Type = "Button", Theme = self and self.Theme, Structures = { Body = body, Overlay = overlay, Label = labelObj }, __instance = body.__instance }
-    function obj.Parent(p) body.Parent = p end
-    function obj:SetLabel(text) labelObj.Text = text end
-    function obj:SetState(state) props.State = state; applyState() end
-    return obj
+    local object = { Type = "Button", Theme = self.Theme, Structures = structures, __instance = structures.Body.__instance }
+    function object:SetLabel(text) structures.Label.Text = text end
+    function object:SetState(state) props.State = state; structures.Label.TextColor3 = getTextColor(); structures.Label.TextTransparency = getTextTransparency() end
+    return object
 end

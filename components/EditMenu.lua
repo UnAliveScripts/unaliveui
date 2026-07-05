@@ -1,126 +1,73 @@
--- Figma-accurate EditMenu component
--- From Figma: Edit Menu (1:308) with Glass Effect + Fill+Shadow + 6 action items
 local TweenService = game:GetService("TweenService")
-local Animate = _G.__unaliveui_animation or require(script.Parent.Parent.animations.init)
 local create = _G.__unaliveui_creator.Create
-local icons = _G.__unaliveui_icons or {}
 
 return function(self, props)
-    props = props or {}
-    props.Items = props.Items or {
-        { Label = "Farm" }, { Label = "Shop" }, { Label = "Steal" },
-        { Label = "Spawn", Destructive = true }, { Label = "Config" }, { Label = "Settings" },
-    }
-    props.OnSelected = props.OnSelected or nil
+    props = props or {}; props.Items = props.Items or {}
 
-    local theme = _G.__unaliveui_themes_Dark.EditMenu
-    local structures = {}
-    local itemButtons = {}
+    local structures = { ItemButtons = {} }
 
     local body = create("Frame")({
         Name = "EditMenu", BackgroundTransparency = 1, BorderSizePixel = 0,
         Size = UDim2.fromOffset(488, 44), AutomaticSize = Enum.AutomaticSize.XY,
-
-        create("Frame")({
-            Name = "FillShadow", BackgroundColor3 = Color3.fromRGB(204, 204, 204),
+        create("Frame")({ Name = "FillShadow", BackgroundColor3 = Color3.fromRGB(204, 204, 204),
             BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), ZIndex = 0,
-            create("UICorner")({ CornerRadius = UDim.new(0, 34) }),
-        }),
-
-        create("Frame")({
-            Name = "Glass", BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+            create("UICorner")({ CornerRadius = UDim.new(0, 34) }) }),
+        create("Frame")({ Name = "Glass", BackgroundColor3 = Color3.fromRGB(0, 0, 0),
             BackgroundTransparency = 0.996, BorderSizePixel = 0,
             Size = UDim2.fromScale(1, 1), ZIndex = 1,
             create("UICorner")({ CornerRadius = UDim.new(0, 34) }),
-            create("UIStroke")({ Color = Color3.fromRGB(255, 255, 255), Transparency = 0.95, Thickness = 0.5 }),
-        }),
-
-        create("Frame")({
-            Name = "Content", BackgroundTransparency = 1, BorderSizePixel = 0,
+            create("UIStroke")({ Name = "Border", Color = Color3.fromRGB(255, 255, 255), Transparency = 0.95, Thickness = 0.5 }) }),
+        create("Frame")({ Name = "Content", BackgroundTransparency = 1, BorderSizePixel = 0,
             Size = UDim2.fromScale(1, 1), ZIndex = 2,
             create("UIListLayout")({ FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 0) }),
-            create("UIPadding")({ PaddingLeft = UDim.new(0, 20), PaddingRight = UDim.new(0, 4) }),
-        }),
+            create("UIPadding")({ PaddingLeft = UDim.new(0, 20), PaddingRight = UDim.new(0, 4) }) }),
     })
 
     local content = body.__instance:FindFirstChild("Content")
 
     for i, item in ipairs(props.Items) do
         if i > 1 then
-            create("Frame")({
-                Name = "Separator", BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-                BackgroundTransparency = 0.8, BorderSizePixel = 0,
-                Size = UDim2.fromOffset(1, 18), Parent = content,
-            })
+            local sep = Instance.new("Frame")
+            sep.BackgroundColor3 = Color3.fromRGB(255, 255, 255); sep.BackgroundTransparency = 0.8
+            sep.BorderSizePixel = 0; sep.Size = UDim2.fromOffset(1, 18); sep.Parent = content
         end
-
-        local actionFrame = create("Frame")({
-            Name = "Action" .. i, BackgroundTransparency = 1, BorderSizePixel = 0,
-            AutomaticSize = Enum.AutomaticSize.XY, Parent = content,
-
-            create("TextLabel")({
-                Name = "Label", BackgroundTransparency = 1, BorderSizePixel = 0,
-                FontFace = Font.new("rbxassetid://12187365364"),
-                Text = item.Label, TextSize = 15,
-                TextColor3 = item.Destructive and Color3.fromRGB(255, 69, 88) or Color3.fromRGB(245, 245, 245),
-                AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 18),
-            }),
-
-            create("UIPadding")({ PaddingLeft = UDim.new(0, 16), PaddingRight = UDim.new(0, 16) }),
-        })
-
+        local action = Instance.new("Frame")
+        action.BackgroundTransparency = 1; action.BorderSizePixel = 0
+        action.AutomaticSize = Enum.AutomaticSize.XY; action.Name = "Action" .. i; action.Parent = content
+        local text = Instance.new("TextLabel")
+        text.BackgroundTransparency = 1; text.BorderSizePixel = 0
+        text.FontFace = Font.new("rbxassetid://12187365364"); text.Text = item.Label; text.TextSize = 15
+        text.TextColor3 = item.Destructive and Color3.fromRGB(255, 69, 88) or Color3.fromRGB(245, 245, 245)
+        text.AutomaticSize = Enum.AutomaticSize.XY; text.Size = UDim2.fromOffset(0, 18); text.Name = "Label"; text.Parent = action
+        local pad = Instance.new("UIPadding")
+        pad.PaddingLeft = UDim.new(0, 16); pad.PaddingRight = UDim.new(0, 16); pad.Parent = action
         local hitbox = Instance.new("ImageButton")
-        hitbox.Name = "Hitbox"; hitbox.BackgroundTransparency = 1
-        hitbox.BorderSizePixel = 0; hitbox.Size = UDim2.fromScale(1, 1); hitbox.ZIndex = 10
-        hitbox.Parent = actionFrame.__instance
-
-        local hoverOverlay = Instance.new("Frame")
-        hoverOverlay.Name = "Hover"; hoverOverlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        hoverOverlay.BackgroundTransparency = 1; hoverOverlay.BorderSizePixel = 0
-        hoverOverlay.Size = UDim2.fromScale(1, 1); hoverOverlay.ZIndex = 9
-        hoverOverlay.Parent = actionFrame.__instance
-        Instance.new("UICorner", hoverOverlay).CornerRadius = UDim.new(0, 6)
-
-        hitbox.MouseEnter:Connect(function()
-            TweenService:Create(hoverOverlay, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 0.92 }):Play()
-        end)
-        hitbox.MouseLeave:Connect(function()
-            TweenService:Create(hoverOverlay, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
-        end)
-        hitbox.MouseButton1Down:Connect(function()
-            TweenService:Create(hoverOverlay, TweenInfo.new(0.08, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { BackgroundTransparency = 0.85 }):Play()
-        end)
-        hitbox.MouseButton1Up:Connect(function()
-            TweenService:Create(hoverOverlay, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
-            if props.OnSelected then props.OnSelected(item, i) end
-        end)
-
-        table.insert(itemButtons, { Frame = actionFrame, Label = actionFrame.__instance:FindFirstChild("Label"), Hitbox = hitbox, Hover = hoverOverlay, Data = item })
+        hitbox.Name = "Hitbox"; hitbox.BackgroundTransparency = 1; hitbox.BorderSizePixel = 0
+        hitbox.Size = UDim2.fromScale(1, 1); hitbox.ZIndex = 10; hitbox.Parent = action
+        local hover = Instance.new("Frame")
+        hover.Name = "Hover"; hover.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        hover.BackgroundTransparency = 1; hover.BorderSizePixel = 0
+        hover.Size = UDim2.fromScale(1, 1); hover.ZIndex = 9; hover.Parent = action
+        Instance.new("UICorner", hover).CornerRadius = UDim.new(0, 6)
+        hitbox.MouseEnter:Connect(function() TweenService:Create(hover, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 0.92 }):Play() end)
+        hitbox.MouseLeave:Connect(function() TweenService:Create(hover, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play() end)
+        hitbox.MouseButton1Down:Connect(function() TweenService:Create(hover, TweenInfo.new(0.08, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { BackgroundTransparency = 0.85 }):Play() end)
+        hitbox.MouseButton1Up:Connect(function() TweenService:Create(hover, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play(); if props.OnSelected then props.OnSelected(item, i) end end)
+        table.insert(structures.ItemButtons, { Frame = action, Label = text, Hitbox = hitbox, Hover = hover, Data = item })
     end
 
-    create("Frame")({
-        Name = "Spacer", BackgroundTransparency = 1, BorderSizePixel = 0,
-        Size = UDim2.new(1, -130, 0, 0), Parent = content,
-    })
+    local indicator = Instance.new("Frame")
+    indicator.BackgroundColor3 = Color3.fromRGB(18, 18, 18); indicator.BorderSizePixel = 0
+    indicator.Size = UDim2.fromOffset(36, 36); indicator.Parent = content
+    Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
+    local indText = Instance.new("TextLabel")
+    indText.BackgroundTransparency = 1; indText.BorderSizePixel = 0
+    indText.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold)
+    indText.Text = "??"; indText.TextSize = 15; indText.TextColor3 = Color3.fromRGB(245, 245, 245)
+    indText.Size = UDim2.fromScale(1, 1); indText.TextXAlignment = Enum.TextXAlignment.Center
+    indText.TextYAlignment = Enum.TextYAlignment.Center; indText.Parent = indicator
 
-    local menuIndicator = create("Frame")({
-        Name = "MenuIndicator", BackgroundColor3 = Color3.fromRGB(18, 18, 18),
-        BorderSizePixel = 0, Size = UDim2.fromOffset(36, 36), ZIndex = 3, Parent = content,
-        create("UICorner")({ CornerRadius = UDim.new(1, 0) }),
-        create("TextLabel")({
-            BackgroundTransparency = 1, BorderSizePixel = 0,
-            FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold),
-            Text = "??", TextSize = 15, TextColor3 = Color3.fromRGB(245, 245, 245),
-            Size = UDim2.fromScale(1, 1), TextXAlignment = Enum.TextXAlignment.Center,
-            TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 4,
-        }),
-    })
-
-    body.Position = UDim2.fromOffset(0, -20); body.BackgroundTransparency = 1
-    task.wait()
-    TweenService:Create(body.__instance, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.fromOffset(0, 0), BackgroundTransparency = 0 }):Play()
-
-    local obj = { Type = "EditMenu", Theme = self and self.Theme, Structures = { Body = body, Items = itemButtons, Indicator = menuIndicator }, __instance = body.__instance, Items = itemButtons }
-    function obj.Parent(p) body.Parent = p end
-    return obj
+    local object = { Type = "EditMenu", Theme = self and self.Theme, Structures = structures, __instance = body.__instance }
+    function object.Parent(p) body.Parent = p end
+    return object
 end

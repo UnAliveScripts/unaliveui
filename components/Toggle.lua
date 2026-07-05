@@ -1,99 +1,87 @@
--- Figma-accurate Toggle/Switch
 local TweenService = game:GetService("TweenService")
 local create = _G.__unaliveui_creator.Create
 
 return function(self, props)
     props = props or {}
-    props.Value = props.Value or false
-    props.Disabled = props.Disabled or false
+    props.Value = props.Value == true
 
-    local theme = self and self.Theme and self.Theme.Toggle or {
-        TrackOn = { Color3.fromRGB(52, 199, 89), 0 },
-        TrackOff = { Color3.fromRGB(60, 60, 68), 0.3 },
-        Thumb = { Color3.fromRGB(255, 255, 255), 0 },
-    }
+    local parent = self.__container or self.__instance or self
+    local theme = self.Theme.Controls.Toggle
+    local structures = {}
 
-    local container = create("Frame")({
-        Name = "Toggle", BackgroundTransparency = 1, BorderSizePixel = 0,
-        Size = UDim2.fromOffset(63, 27),
+    structures.Body = create("Frame")({
+        Name = "Toggle",
+        BackgroundTransparency = 1, BorderSizePixel = 0,
+        Size = UDim2.fromOffset(28, 16), Parent = parent,
+
+        create("ImageButton")({
+            Name = "Switch", AutoButtonColor = false,
+            BackgroundTransparency = 1, BorderSizePixel = 0,
+            Image = "rbxassetid://104426531889908",
+            Size = UDim2.fromOffset(28, 16),
+            __dynamicKeys = {
+                ImageColor3 = theme.SwitchOff[1],
+                ImageTransparency = theme.SwitchOff[2],
+            },
+            create("ImageLabel")({
+                Name = "Knob",
+                AnchorPoint = Vector2.new(0, 0.5),
+                BackgroundTransparency = 1, BorderSizePixel = 0,
+                Image = "rbxassetid://99107881432922",
+                Position = UDim2.new(0, 1, 0.5, 0),
+                Size = UDim2.fromOffset(14, 14),
+                __dynamicKeys = {
+                    ImageColor3 = theme.Knob[1],
+                    ImageTransparency = theme.Knob[2],
+                },
+                create("ImageLabel")({
+                    Name = "Effects",
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    BackgroundTransparency = 1, BorderSizePixel = 0,
+                    Image = "rbxassetid://138042641797315",
+                    Position = UDim2.fromScale(0.5, 0.5),
+                    Size = UDim2.fromOffset(16, 16),
+                    __dynamicKeys = {
+                        ImageColor3 = theme.KnobEffects[1],
+                        ImageTransparency = theme.KnobEffects[2],
+                    },
+                }),
+            }),
+            create("UIGradient")({
+                Name = "Depth", Rotation = 90,
+                __dynamicKeys = { Color = theme.DepthEffect },
+            }),
+        }),
     })
 
-    local track = create("Frame")({
-        Name = "Track", BackgroundColor3 = theme.TrackOff[1].Value,
-        BackgroundTransparency = theme.TrackOff[2].Value, BorderSizePixel = 0,
-        Size = UDim2.fromScale(1, 1), Parent = container.__instance,
-        create("UICorner")({ CornerRadius = UDim.new(1, 0) }),
-    })
+    structures.Switch = structures.Body.__instance:FindFirstChild("Switch")
+    structures.Knob = structures.Switch:FindFirstChild("Knob")
 
-    local knob = create("ImageButton")({
-        Name = "Knob", BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false,
-        Position = UDim2.fromOffset(2, 2), Size = UDim2.fromOffset(39, 23),
-        Parent = container.__instance, ZIndex = 2,
-        create("UICorner")({ CornerRadius = UDim.new(1, 0) }),
-        create("UIStroke")({ Color = Color3.fromRGB(0, 0, 0), Transparency = 0.92, Thickness = 0.5 }),
-    })
+    local function updateValue(val, instant)
+        local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+        local knobGoal = { Position = val and UDim2.new(0, 13, 0.5, 0) or UDim2.new(0, 1, 0.5, 0) }
+        local switchColor = val and theme.SwitchOn[1].Value or theme.SwitchOff[1].Value
+        local switchTrans = val and theme.SwitchOn[2].Value or theme.SwitchOff[2].Value
 
-    local structures = { Container = container, Track = track.__instance, Knob = knob.__instance }
-
-    local function updateUI(val, instant)
         if instant then
-            if val then
-                structures.Track.BackgroundColor3 = theme.TrackOn[1].Value
-                structures.Track.BackgroundTransparency = theme.TrackOn[2].Value
-                structures.Knob.Position = UDim2.fromOffset(22, 2)
-                structures.Container.Size = UDim2.fromOffset(62, 26)
-            else
-                structures.Track.BackgroundColor3 = theme.TrackOff[1].Value
-                structures.Track.BackgroundTransparency = theme.TrackOff[2].Value
-                structures.Knob.Position = UDim2.fromOffset(2, 2)
-                structures.Container.Size = UDim2.fromOffset(63, 27)
-            end
+            structures.Knob.Position = knobGoal.Position
+            structures.Switch.ImageColor3 = switchColor
+            structures.Switch.ImageTransparency = switchTrans
             return
         end
-        if val then
-            TweenService:Create(structures.Track, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { BackgroundColor3 = theme.TrackOn[1].Value, BackgroundTransparency = theme.TrackOn[2].Value }):Play()
-            TweenService:Create(structures.Knob, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.fromOffset(22, 2) }):Play()
-            TweenService:Create(structures.Container, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(62, 26) }):Play()
-        else
-            TweenService:Create(structures.Track, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundColor3 = theme.TrackOff[1].Value, BackgroundTransparency = theme.TrackOff[2].Value }):Play()
-            TweenService:Create(structures.Knob, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.fromOffset(2, 2) }):Play()
-            TweenService:Create(structures.Container, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(63, 27) }):Play()
-        end
+        TweenService:Create(structures.Knob, tweenInfo, knobGoal):Play()
+        TweenService:Create(structures.Switch, tweenInfo, { ImageColor3 = switchColor, ImageTransparency = switchTrans }):Play()
     end
 
-    local function onRelease()
-        if props.Disabled then return end
+    updateValue(props.Value, true)
+
+    structures.Switch.MouseButton1Click:Connect(function()
         props.Value = not props.Value
-        updateUI(props.Value)
-        TweenService:Create(structures.Knob, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(39, 23) }):Play()
-        if props.ValueChanged then task.spawn(props.ValueChanged, obj, props.Value) end
-    end
-
-    structures.Knob.MouseButton1Down:Connect(function()
-        if props.Disabled then return end
-        TweenService:Create(structures.Knob, TweenInfo.new(0.08, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(42, 25) }):Play()
-    end)
-    structures.Knob.MouseButton1Up:Connect(onRelease)
-    structures.Knob.MouseLeave:Connect(function()
-        TweenService:Create(structures.Knob, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(39, 23) }):Play()
+        updateValue(props.Value)
+        if props.ValueChanged then task.spawn(props.ValueChanged, object, props.Value) end
     end)
 
-    local trackBtn = Instance.new("ImageButton")
-    trackBtn.Name = "TrackHitbox"; trackBtn.BackgroundTransparency = 1
-    trackBtn.BorderSizePixel = 0; trackBtn.Size = UDim2.fromScale(1, 1); trackBtn.ZIndex = 1
-    trackBtn.Parent = container.__instance
-    trackBtn.MouseButton1Click:Connect(function()
-        if props.Disabled then return end
-        props.Value = not props.Value; updateUI(props.Value)
-        if props.ValueChanged then task.spawn(props.ValueChanged, obj, props.Value) end
-    end)
-
-    updateUI(props.Value, true)
-
-    local obj = { Type = "Toggle", Theme = self and self.Theme, Structures = structures, __instance = container.__instance }
-    function obj:Toggle() props.Value = not props.Value; updateUI(props.Value); if props.ValueChanged then task.spawn(props.ValueChanged, obj, props.Value) end end
-    function obj:SetValue(val) props.Value = val; updateUI(props.Value) end
-    function obj.Parent(p) container.Parent = p end
-    return obj
+    local object = { Type = "Toggle", Theme = self.Theme, Structures = structures, __instance = structures.Body.__instance }
+    function object:SetValue(val) props.Value = val; updateValue(val) end
+    return object
 end

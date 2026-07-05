@@ -1,34 +1,41 @@
 local TweenService = game:GetService("TweenService")
 local create = _G.__unaliveui_creator.Create
+
 return function(self, props)
-    props = props or {}
-    props.Minimum = props.Minimum or 0; props.Maximum = props.Maximum or 100
-    props.Value = props.Value or 50
-    local container = create("Frame")({ Name = "Slider", BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 24) })
-    local track = create("Frame")({ Name = "Track", BackgroundColor3 = Color3.fromRGB(60, 60, 68), BorderSizePixel = 0, Position = UDim2.fromOffset(0, 10), Size = UDim2.new(1, 0, 0, 4), create("UICorner")({ CornerRadius = UDim.new(0, 2) }) })
-    track.Parent = container.__instance
-    local fill = create("Frame")({ Name = "Fill", BackgroundColor3 = Color3.fromRGB(10, 132, 255), BorderSizePixel = 0, Size = UDim2.fromOffset(0, 4), create("UICorner")({ CornerRadius = UDim.new(0, 2) }) })
-    fill.Parent = container.__instance
-    local thumb = create("ImageButton")({ Name = "Thumb", BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0, AutoButtonColor = false, Position = UDim2.fromOffset(0, 2), Size = UDim2.fromOffset(20, 20), ImageColor3 = Color3.fromRGB(200, 200, 200), ZIndex = 2, create("UICorner")({ CornerRadius = UDim.new(1, 0) }) })
-    thumb.Parent = container.__instance
-    local s = { Container = container, Track = track.__instance, Fill = fill.__instance, Thumb = thumb.__instance }
+    props = props or {}; props.Minimum = props.Minimum or 0; props.Maximum = props.Maximum or 100; props.Value = props.Value or 0
+    local theme = self.Theme.Controls.Slider; local parent = self.__container or self.__instance or self
+    local structures = {}; local dragging = false
+
+    local body = create("Frame")({ Name = "Slider", BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 24), Parent = parent })
+    local track = create("Frame")({ Name = "Track", BorderSizePixel = 0, Position = UDim2.fromOffset(0, 10), Size = UDim2.new(1, 0, 0, 4), Parent = body.__instance,
+        __dynamicKeys = { BackgroundColor3 = theme.Track[1], BackgroundTransparency = theme.Track[2] }, create("UICorner")({ CornerRadius = UDim.new(0, 2) }) })
+    local fill = create("Frame")({ Name = "Fill", BorderSizePixel = 0, Size = UDim2.fromOffset(0, 4), Parent = body.__instance,
+        __dynamicKeys = { BackgroundColor3 = self.Theme.Controls.Selection[1] }, create("UICorner")({ CornerRadius = UDim.new(0, 2) }) })
+    local thumb = create("ImageButton")({ Name = "Thumb", AutoButtonColor = false, BackgroundTransparency = 1, BorderSizePixel = 0,
+        Position = UDim2.fromOffset(0, 2), Size = UDim2.fromOffset(20, 20), ZIndex = 2, Parent = body.__instance,
+        __dynamicKeys = { ImageColor3 = theme.Thumb[1], ImageTransparency = theme.Thumb[2] },
+        create("UICorner")({ CornerRadius = UDim.new(1, 0) }),
+        create("UIStroke")({ ApplyStrokeMode = Enum.ApplyStrokeMode.Border, __dynamicKeys = { Color = theme.ThumbStroke[1], Transparency = theme.ThumbStroke[2] } }) })
+
+    structures.Body = body.__instance; structures.Track = track.__instance; structures.Fill = fill.__instance; structures.Thumb = thumb.__instance
+
     local function setPosition(val)
-        local pct = (val - props.Minimum) / (props.Maximum - props.Minimum)
-        local w = container.AbsoluteSize.X - 20; local x = math.floor(pct * w)
-        s.Thumb.Position = UDim2.fromOffset(x, 2); s.Fill.Size = UDim2.fromOffset(x + 10, 4)
+        local range = props.Maximum - props.Minimum; if range <= 0 then return end
+        local pct = (val - props.Minimum) / range; local w = body.AbsoluteSize.X - 20; local x = math.floor(pct * w)
+        structures.Thumb.Position = UDim2.fromOffset(x, 2); structures.Fill.Size = UDim2.fromOffset(x + 10, 4)
     end
-    local dragging = false
-    s.Thumb.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end end)
-    s.Thumb.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
-    s.Thumb.InputChanged:Connect(function(i)
+
+    structures.Thumb.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end end)
+    structures.Thumb.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+    structures.Thumb.InputChanged:Connect(function(i)
         if i.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-            local w = container.AbsoluteSize.X - 20; local x = math.clamp(i.Position.X - 10, 0, w)
-            local pct = x / w; props.Value = props.Minimum + pct * (props.Maximum - props.Minimum)
-            setPosition(props.Value); if props.ValueChanged then task.spawn(props.ValueChanged, obj, props.Value) end
+            local w = body.AbsoluteSize.X - 20; local x = math.clamp(i.Position.X - 10, 0, w)
+            local pct = w > 0 and x / w or 0; props.Value = props.Minimum + pct * (props.Maximum - props.Minimum)
+            setPosition(props.Value); if props.ValueChanged then task.spawn(props.ValueChanged, object, props.Value) end
         end
     end)
     task.wait(); setPosition(props.Value)
-    local obj = { Type = "Slider", Theme = self and self.Theme, Structures = s, __instance = container.__instance }
-    function obj.Parent(p) container.Parent = p end; obj.Value = props.Value; obj.ValueChanged = props.ValueChanged
-    return obj
+    local object = { Type = "Slider", Theme = self.Theme, Structures = structures, __instance = body.__instance }
+    function object:SetValue(val) props.Value = val; setPosition(val) end
+    return object
 end
