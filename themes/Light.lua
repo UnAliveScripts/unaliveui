@@ -1,0 +1,38 @@
+return {
+    _id = "Light",
+    Text = {
+        Primary = { Color3.fromRGB(0, 0, 0), 0 },
+        Secondary = { Color3.fromRGB(120, 120, 130), 0 },
+        SelectionPrimary = { Color3.fromRGB(255, 255, 255), 0 },
+        Link = { Color3.fromRGB(0, 122, 255), 0 },
+    },
+    Controls = {
+        View = { Color3.fromRGB(255, 255, 255), 0 },
+        ViewBorder = { Color3.fromRGB(200, 200, 205), 0 },
+        Selection = { Color3.fromRGB(210, 210, 215), 0.3 },
+        SelectionFocused = { Color3.fromRGB(200, 200, 210), 0.2 },
+        SelectionFocusedAccent = { Color3.fromRGB(0, 0, 0), 0 },
+        ScrollBar = { Color3.fromRGB(150, 150, 160), 0.6 },
+        Divider = { Color3.fromRGB(200, 200, 205), 0 },
+        Button = {
+            FillPrimary = { Color3.fromRGB(220, 220, 225), 0 },
+            FillSecondary = { Color3.fromRGB(240, 240, 245), 0 },
+            Shadow = { Color3.fromRGB(0, 0, 0), 0.1 },
+        },
+        MenuButton = { IndicatorBackground = { Color3.fromRGB(230, 230, 235), 0 } },
+        RadioButtonGroup = {
+            Background = { Color3.fromRGB(0, 0, 0), 0.05 },
+            Overlay = { Color3.fromRGB(255, 255, 255), 0.05 },
+            Dot = { Color3.fromRGB(255, 255, 255), 0.8 },
+            Stroke = { Color3.fromRGB(180, 180, 190), 0.4 },
+            InnerShadow = { Color3.fromRGB(0, 0, 0), 0.05 },
+        },
+        Notification = { Background = { Color3.fromRGB(255, 255, 255), 0.15 }, Border = { Color3.fromRGB(200, 200, 205), 0.4 } },
+        Slider = { Track = { Color3.fromRGB(220, 220, 225), 0 }, TrackFill = { Color3.fromRGB(56, 56, 62), 0 } },
+        NotificationPanel = { Background = { Color3.fromRGB(255, 255, 255), 0.08 } },
+    },
+    Accents = { Red = { Color3.fromRGB(255, 69, 58), 0 } },
+    Blur = { Glass = { Color3.fromRGB(255, 255, 255), 0.95 }, Intensity = 1 },
+    Window = { Titlebar = { Color3.fromRGB(240, 240, 245), 0 }, Background = { Color3.fromRGB(242, 242, 247), 0 }, Border = { Color3.fromRGB(210, 210, 215), 0 } },
+    Toggle = { TrackOn = { Color3.fromRGB(52, 199, 89), 0 }, TrackOff = { Color3.fromRGB(220, 220, 225), 0 }, Thumb = { Color3.fromRGB(255, 255, 255), 0 } },
+}

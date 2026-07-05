@@ -1,0 +1,16 @@
+return {
+    minus = "rbxassetid://110147285593118",
+    plus = "rbxassetid://126761302820331",
+    circle = "rbxassetid://108281361336741",
+    search = "rbxassetid://117204739779559",
+    ["chevron-right"] = "rbxassetid://103603118195781",
+    ["chevron-down"] = "rbxassetid://84215348315149",
+    ["chevron-up"] = "rbxassetid://137296891812002",
+    ["chevron-left"] = "rbxassetid://103603118195781",
+    UnAlivelogo = "rbxassetid://127922205331150",
+    xmark = "rbxassetid://93520763686656",
+    checkmark = "rbxassetid://118333468121914",
+    ["slider-thumb"] = "rbxassetid://109321922977357",
+    ["toggle-on"] = "rbxassetid://138068434560383",
+    ["toggle-off"] = "rbxassetid://84345480243560",
+}
