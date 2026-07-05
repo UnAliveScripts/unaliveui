@@ -16,12 +16,9 @@ _G.__unaliveui_icons = loadModule("icons.lua") or {}
 _G.__unaliveui_creator = loadModule("core/creator.lua") or {}
 _G.__unaliveui_binder = loadModule("core/binder.lua") or {}
 _G.__unaliveui_themes_Dark = loadModule("themes/Dark.lua")
-_G.__unaliveui_themes_Light = loadModule("themes/Light.lua")
 _G.__unaliveui_animation = loadModule("animations/init.lua")
 _G.__unaliveui_blur = loadModule("core/blur.lua")
 
-local themeInit = loadModule("themes/init.lua") or {}
-local accents = loadModule("themes/accents.lua") or {}
 local services = loadModule("core/services.lua") or {}
 local utility_mod = loadModule("core/utility.lua") or {}
 
@@ -42,10 +39,10 @@ local components = loadModule("components/init.lua") or {}
 _G.UnaliveUI = {
     Icons = _G.__unaliveui_icons,
     Services = services,
-    Themes = themeInit,
-    Accents = accents,
+    Themes = { Dark = _G.__unaliveui_themes_Dark },
     Components = components,
     Creator = _G.__unaliveui_creator,
+    Binder = _G.__unaliveui_binder,
     Utility = utility_mod,
     Blur = _G.__unaliveui_blur,
     Animation = _G.__unaliveui_animation,
