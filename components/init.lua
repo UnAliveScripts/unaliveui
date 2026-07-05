@@ -1,24 +1,16 @@
 local components = {}
-local componentNames = {
-    "Window", "Button", "Toggle", "Slider", "Label",
-    "TextField", "Stepper", "Notification", "Icon", "Page", "Row", "EditMenu"
-}
-for _, name in ipairs(componentNames) do
-    local mod = _G["__unaliveui_components_" .. name]
+local names = { "Window", "Button", "Toggle", "Slider", "Label", "TextField", "Stepper", "Notification", "Icon", "Page", "Row", "EditMenu" }
+for _, n in ipairs(names) do
+    local mod = _G["__unaliveui_components_" .. n]
     if mod then
-        components[name] = function(self, ...)
-            local ok, result = pcall(mod, self, ...)
-            if not ok then
-                warn("UnaliveUI: " .. name .. " error: " .. tostring(result))
-                return nil
+        components[n] = function(self, ...)
+            local ok, r = pcall(mod, self, ...)
+            if not ok then warn("UI:" .. n .. " " .. tostring(r)); return nil end
+            if type(r) == "table" then
+                r.Type = r.Type or n
+                if not r.Theme and self and self.Theme then r.Theme = self.Theme end
             end
-            if type(result) == "table" then
-                result.Type = result.Type or name
-                if not result.Theme and self and self.Theme then
-                    result.Theme = self.Theme
-                end
-            end
-            return result
+            return r
         end
     end
 end

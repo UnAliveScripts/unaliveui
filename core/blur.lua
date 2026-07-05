@@ -1,10 +1,7 @@
 local TweenService = game:GetService("TweenService")
-local function map(v, iMin, iMax, oMin, oMax)
-    return (v - iMin) * (oMax - oMin) / (iMax - iMin) + oMin
-end
+local function map(v, iMin, iMax, oMin, oMax) return (v - iMin) * (oMax - oMin) / (iMax - iMin) + oMin end
 local function viewportPointToWorld(location, distance)
-    local cam = workspace.CurrentCamera
-    local unitRay = cam:ScreenPointToRay(location.X, location.Y)
+    local cam = workspace.CurrentCamera; local unitRay = cam:ScreenPointToRay(location.X, location.Y)
     return unitRay.Origin + unitRay.Direction * distance
 end
 local function getOffset()
@@ -65,9 +62,7 @@ return function(frame, distance)
     onChange(frame)
     return {
         Model = part,
-        SetVisibility = function(v)
-            TweenService:Create(part, TweenInfo.new(0.3, Enum.EasingStyle.Exponential), { Transparency = v and 0.98 or 1 }):Play()
-        end,
+        SetVisibility = function(v) TweenService:Create(part, TweenInfo.new(0.3, Enum.EasingStyle.Exponential), { Transparency = v and 0.98 or 1 }):Play() end,
         SetIntensity = function(v) effect.InFocusRadius = v or 0.1 end,
     }
 end

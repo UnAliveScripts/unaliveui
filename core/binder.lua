@@ -1,42 +1,27 @@
-local binder = {}
-
-function binder.Apply(properties, object, excludes)
-    for property, value in pairs(properties) do
-        if excludes and table.find(excludes, property) then
-            continue
-        end
-        pcall(function() object[property] = value end)
+local B = {}
+function B.Apply(props, obj, excl)
+    for k, v in pairs(props) do
+        if excl and table.find(excl, k) then continue end
+        pcall(function() obj[k] = v end)
     end
-    return object
+    return obj
 end
 
-function binder.Wrap(object, bindings, instance, excludeSets)
-    local proxy = {}
-    setmetatable(proxy, {
-        __index = function(_, key)
-            if object[key] ~= nil then return object[key] end
-            if instance then
-                local ok, value = pcall(function() return instance[key] end)
-                if ok then return value end
-            end
+function B.Wrap(obj, bindings, inst, excl)
+    local p = {}
+    setmetatable(p, {
+        __index = function(_, k)
+            if obj[k] ~= nil then return obj[k] end
+            if inst then local ok, v = pcall(function() return inst[k] end); if ok then return v end end
             return nil
         end,
-        __newindex = function(_, key, value)
-            local handler = bindings[key]
-            if handler then
-                handler(value)
-                if not (excludeSets and table.find(excludeSets, key)) then
-                    object[key] = value
-                end
-            elseif instance then
-                local ok, _ = pcall(function() instance[key] = value end)
-                if not ok then object[key] = value end
-            else
-                object[key] = value
-            end
+        __newindex = function(_, k, v)
+            local h = bindings[k]
+            if h then h(v); if not (excl and table.find(excl, k)) then obj[k] = v end
+            elseif inst then local ok, _ = pcall(function() inst[k] = v end); if not ok then obj[k] = v end
+            else obj[k] = v end
         end,
     })
-    return proxy
+    return p
 end
-
-return binder
+return B
