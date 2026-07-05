@@ -1,4 +1,4 @@
--- UnaliveUI Figma Demo
+-- UnaliveUI Figma Demo (Final)
 -- Load: loadstring(game:HttpGet("https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/demo.lua"))()
 
 local TS = game:GetService("TweenService")
@@ -9,14 +9,14 @@ local icons = { UnAlivelogo = "rbxassetid://127922205331150" }
 
 local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 local gui = Instance.new("ScreenGui"); gui.Name = "UnaliveUIDemo"
-gui.ResetOnSpawn = false; gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.DisplayOrder = 200; gui.Parent = playerGui
+gui.ResetOnSpawn = false; gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling; gui.DisplayOrder = 200; gui.Parent = playerGui
 
 local function IsNotNaN(x) return x == x end
 
--- BLUR
+local root = Instance.new("Folder", camera)
 local MTREL = "Glass"; local wedgeguid = HS:GenerateGUID(true)
-local root = Instance.new("Folder", camera); root.Name = HS:GenerateGUID(true)
+root.Name = HS:GenerateGUID(true)
+
 local DepthOfField
 for _,v in pairs(game:GetService("Lighting"):GetChildren()) do
     if not v:IsA("DepthOfFieldEffect") and v:HasTag(".") then
@@ -74,81 +74,60 @@ end
 
 -- NOTIFICATION
 local n = Instance.new("Frame"); n.Name = "Notification"
-n.Size = UDim2.fromOffset(386, 64); n.Position = UDim2.new(0.5,-193,0.5,-120)
-n.BackgroundTransparency = 1; n.ClipsDescendants = true; n.BorderSizePixel = 0; n.ZIndex = 10; n.Parent = gui
+n.Size = UDim2.fromOffset(386, 64); n.Position = UDim2.new(0.5,-193,0.5,-128)
+n.BackgroundTransparency = 1; n.BorderSizePixel = 0; n.ZIndex = 10; n.Parent = gui
 local nc = Instance.new("UICorner"); nc.CornerRadius = UDim.new(0, 24); nc.Parent = n
 
-local sh = Instance.new("Frame"); sh.Size = UDim2.fromScale(1,1); sh.Position = UDim2.fromOffset(0,8)
-sh.BackgroundColor3 = Color3.fromRGB(0,0,0); sh.BackgroundTransparency = 0.75; sh.BorderSizePixel = 0; sh.ZIndex = -1; sh.Parent = n
+local sh = Instance.new("Frame"); sh.Name = "Shadow"
+sh.Size = UDim2.new(1, 4, 1, 4); sh.Position = UDim2.fromOffset(-2, -2)
+sh.BackgroundColor3 = Color3.fromRGB(0,0,0); sh.BackgroundTransparency = 0.78
+sh.BorderSizePixel = 0; sh.ZIndex = -1; sh.Parent = n
 local shc = Instance.new("UICorner"); shc.CornerRadius = UDim.new(0, 24); shc.Parent = sh
 
-local db = Instance.new("Frame"); db.Size = UDim2.fromScale(1,1); db.BackgroundColor3 = Color3.fromRGB(12,14,20)
-db.BackgroundTransparency = 0.35; db.BorderSizePixel = 0; db.ZIndex = 1; db.Parent = n
-local dbc = Instance.new("UICorner"); dbc.CornerRadius = UDim.new(0, 24); dbc.Parent = db
+local cv = Instance.new("Frame"); cv.Size = UDim2.fromScale(1,1)
+cv.BackgroundColor3 = Color3.fromRGB(18,20,26); cv.BackgroundTransparency = 0.15
+cv.BorderSizePixel = 0; cv.ZIndex = 1; cv.Parent = n
+local cvc = Instance.new("UICorner"); cvc.CornerRadius = UDim.new(0, 24); cvc.Parent = cv
 
-local g = Instance.new("Frame"); g.Size = UDim2.fromScale(1,1); g.BackgroundColor3 = Color3.fromRGB(255,255,255)
-g.BackgroundTransparency = 0.93; g.BorderSizePixel = 0; g.ZIndex = 2; g.Name = "Glass"; g.Parent = n
-local gc = Instance.new("UICorner"); gc.CornerRadius = UDim.new(0, 24); gc.Parent = g
+local icon = Instance.new("ImageLabel"); icon.Size = UDim2.fromOffset(38,38); icon.Position = UDim2.fromOffset(14,13)
+icon.BackgroundTransparency = 1; icon.BorderSizePixel = 0; icon.Image = icons.UnAlivelogo; icon.ZIndex = 3; icon.Parent = n
+local icr = Instance.new("UICorner"); icr.CornerRadius = UDim.new(0,10); icr.Parent = icon
 
-local gs = Instance.new("UIStroke"); gs.Color = Color3.fromRGB(255,255,255); gs.Transparency = 0.82
-gs.Thickness = 6; gs.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; gs.Parent = g
-
-local bf = Instance.new("Frame"); bf.Size = UDim2.fromScale(1,1); bf.BackgroundTransparency = 1
-bf.BorderSizePixel = 0; bf.ZIndex = 0; bf.Name = "Blur"; bf.Parent = n
-local bfc = Instance.new("UICorner"); bfc.CornerRadius = UDim.new(0, 24); bfc.Parent = bf
-applyBlur(bf)
-
-local icon = Instance.new("ImageLabel"); icon.Name = "Icon"
-icon.Size = UDim2.fromOffset(38, 38); icon.Position = UDim2.fromOffset(14, 13)
-icon.BackgroundTransparency = 1; icon.BorderSizePixel = 0; icon.Image = icons.UnAlivelogo; icon.ZIndex = 4; icon.Parent = n
-local icr = Instance.new("UICorner"); icr.CornerRadius = UDim.new(0, 10); icr.Parent = icon
-
-local timeText = Instance.new("TextLabel"); timeText.Name = "Time"
-timeText.Size = UDim2.fromOffset(26, 17); timeText.Position = UDim2.fromOffset(346, 12)
-timeText.BackgroundTransparency = 1; timeText.BorderSizePixel = 0
-timeText.FontFace = Font.new("rbxassetid://12187365364"); timeText.Text = "now"; timeText.TextSize = 13
-timeText.TextColor3 = Color3.fromRGB(140, 140, 150); timeText.ZIndex = 4
-timeText.TextXAlignment = Enum.TextXAlignment.Right; timeText.TextYAlignment = Enum.TextYAlignment.Top; timeText.Parent = n
-
-local title = Instance.new("TextLabel"); title.Name = "Title"
-title.Size = UDim2.fromOffset(274, 17); title.Position = UDim2.fromOffset(62, 12)
+local title = Instance.new("TextLabel"); title.Size = UDim2.fromOffset(274,17); title.Position = UDim2.fromOffset(62,12)
 title.BackgroundTransparency = 1; title.BorderSizePixel = 0
-title.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold)
-title.Text = "UnAlive"; title.TextSize = 15; title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextXAlignment = Enum.TextXAlignment.Left; title.TextYAlignment = Enum.TextYAlignment.Top
-title.RichText = true; title.ZIndex = 4; title.Parent = n
+title.FontFace = Font.new("rbxassetid://12187365364",Enum.FontWeight.Bold)
+title.Text = "UnAlive"; title.TextSize = 15; title.TextColor3 = Color3.fromRGB(255,255,255)
+title.TextXAlignment = Enum.TextXAlignment.Left; title.TextYAlignment = Enum.TextYAlignment.Top; title.RichText = true; title.ZIndex = 3; title.Parent = n
 
-local desc = Instance.new("TextLabel"); desc.Name = "Description"
-desc.Size = UDim2.fromOffset(274, 18); desc.Position = UDim2.fromOffset(62, 30)
-desc.BackgroundTransparency = 1; desc.BorderSizePixel = 0
-desc.FontFace = Font.new("rbxassetid://12187365364"); desc.Text = "Welcome to UnAlive"; desc.TextSize = 15
-desc.TextColor3 = Color3.fromRGB(200, 200, 210); desc.ZIndex = 4
-desc.TextXAlignment = Enum.TextXAlignment.Left; desc.TextYAlignment = Enum.TextYAlignment.Top
-desc.RichText = true; desc.Parent = n
+local desc = Instance.new("TextLabel"); desc.Size = UDim2.fromOffset(274,18); desc.Position = UDim2.fromOffset(62,30)
+desc.BackgroundTransparency = 1; desc.BorderSizePixel = 0; desc.FontFace = Font.new("rbxassetid://12187365364")
+desc.Text = "Welcome to UnAlive"; desc.TextSize = 15; desc.TextColor3 = Color3.fromRGB(180,180,190)
+desc.TextXAlignment = Enum.TextXAlignment.Left; desc.TextYAlignment = Enum.TextYAlignment.Top; desc.RichText = true; desc.ZIndex = 3; desc.Parent = n
 
-TS:Create(n, TweenInfo.new(0.55, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { Position = UDim2.new(0.5,-193,0.5,-120) }):Play()
+local tx = Instance.new("TextLabel"); tx.Size = UDim2.fromOffset(26,17); tx.Position = UDim2.fromOffset(346,12)
+tx.BackgroundTransparency = 1; tx.BorderSizePixel = 0; tx.FontFace = Font.new("rbxassetid://12187365364")
+tx.Text = "now"; tx.TextSize = 13; tx.TextColor3 = Color3.fromRGB(140,140,150); tx.ZIndex = 3
+tx.TextXAlignment = Enum.TextXAlignment.Right; tx.TextYAlignment = Enum.TextYAlignment.Top; tx.Parent = n
+
+n.Position = UDim2.new(0.5,-193,0.5,-130)
+TS:Create(n, TweenInfo.new(0.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), { Position = UDim2.new(0.5,-193,0.5,-120) }):Play()
 
 -- EDIT MENU
-local m = Instance.new("Frame"); m.Name = "EditMenu"; m.Size = UDim2.fromOffset(488,44)
-m.Position = UDim2.new(0.5,-244,0.5,-22); m.BackgroundTransparency = 1
-m.ClipsDescendants = true; m.BorderSizePixel = 0; m.ZIndex = 20; m.Parent = gui
-local mc2 = Instance.new("UICorner"); mc2.CornerRadius = UDim.new(0, 34); mc2.Parent = m
+local m = Instance.new("Frame"); m.Name = "EditMenu"
+m.Size = UDim2.fromOffset(488,44); m.Position = UDim2.new(0.5,-244,0.5,-22)
+m.BackgroundTransparency = 1; m.BorderSizePixel = 0; m.ZIndex = 20; m.Parent = gui
+local mc2 = Instance.new("UICorner"); mc2.CornerRadius = UDim.new(0,34); mc2.Parent = m
 
-local msh = Instance.new("Frame"); msh.Size = UDim2.fromScale(1,1); msh.Position = UDim2.fromOffset(0,8)
-msh.BackgroundColor3 = Color3.fromRGB(0,0,0); msh.BackgroundTransparency = 0.82
-msh.BorderSizePixel = 0; msh.ZIndex = -1; msh.Parent = m
-local mshc = Instance.new("UICorner"); mshc.CornerRadius = UDim.new(0, 34); mshc.Parent = msh
+local sh2 = Instance.new("Frame"); sh2.Name = "Shadow"
+sh2.Size = UDim2.new(1, 4, 1, 4); sh2.Position = UDim2.fromOffset(-2, -2)
+sh2.BackgroundColor3 = Color3.fromRGB(0,0,0); sh2.BackgroundTransparency = 0.82
+sh2.BorderSizePixel = 0; sh2.ZIndex = -1; sh2.Parent = m
+local sh2c = Instance.new("UICorner"); sh2c.CornerRadius = UDim.new(0,34); sh2c.Parent = sh2
 
-local f1 = Instance.new("Frame"); f1.Size = UDim2.fromScale(1,1); f1.BackgroundColor3 = Color3.fromRGB(204,204,204); f1.BackgroundTransparency = 0.33; f1.BorderSizePixel = 0; f1.ZIndex = 1; f1.Parent = m
-local fc1 = Instance.new("UICorner"); fc1.CornerRadius = UDim.new(0, 34); fc1.Parent = f1
-local f2 = Instance.new("Frame"); f2.Size = UDim2.fromScale(1,1); f2.BackgroundColor3 = Color3.fromRGB(0,0,0); f2.BackgroundTransparency = 0.4; f2.BorderSizePixel = 0; f2.ZIndex = 1; f2.Parent = m
-local fc2 = Instance.new("UICorner"); fc2.CornerRadius = UDim.new(0, 34); fc2.Parent = f2
-local ge = Instance.new("Frame"); ge.Size = UDim2.fromScale(1,1); ge.BackgroundColor3 = Color3.fromRGB(0,0,0); ge.BackgroundTransparency = 0.996; ge.BorderSizePixel = 0; ge.ZIndex = 1; ge.Parent = m
-local gec = Instance.new("UICorner"); gec.CornerRadius = UDim.new(0, 34); gec.Parent = ge
-local gb = Instance.new("UIStroke"); gb.Color = Color3.fromRGB(0,0,0); gb.Transparency = 0.9; gb.Thickness = 6; gb.Parent = ge
-
-local bf2 = Instance.new("Frame"); bf2.Size = UDim2.fromScale(1,1); bf2.BackgroundTransparency = 1; bf2.BorderSizePixel = 0; bf2.ZIndex = 0; bf2.Parent = m
-local bf2c = Instance.new("UICorner"); bf2c.CornerRadius = UDim.new(0, 34); bf2c.Parent = bf2; applyBlur(bf2)
+local c2 = Instance.new("Frame"); c2.Size = UDim2.fromScale(1,1)
+c2.BackgroundColor3 = Color3.fromRGB(15,17,22); c2.BackgroundTransparency = 0.2
+c2.BorderSizePixel = 0; c2.ZIndex = 1; c2.Parent = m
+local c2c = Instance.new("UICorner"); c2c.CornerRadius = UDim.new(0,34); c2c.Parent = c2
 
 local mc = Instance.new("Frame"); mc.Size = UDim2.fromScale(1,1); mc.BackgroundTransparency = 1; mc.BorderSizePixel = 0; mc.ZIndex = 3; mc.Parent = m
 local ml = Instance.new("UIListLayout"); ml.FillDirection = Enum.FillDirection.Horizontal; ml.VerticalAlignment = Enum.VerticalAlignment.Center; ml.Padding = UDim.new(0,0); ml.Parent = mc
@@ -162,10 +141,18 @@ for i, item in ipairs(items) do
     local txl=Instance.new("TextLabel"); txl.BackgroundTransparency=1; txl.BorderSizePixel=0; txl.FontFace=Font.new("rbxassetid://12187365364"); txl.Text=item.Label; txl.TextSize=15; txl.TextColor3=item.Destructive and dc or nc2; txl.AutomaticSize=Enum.AutomaticSize.XY; txl.Size=UDim2.fromOffset(0,18); txl.Parent=a
     local ap=Instance.new("UIPadding"); ap.PaddingLeft=UDim.new(0,16); ap.PaddingRight=UDim.new(0,16); ap.Parent=a
 end
-local ind=Instance.new("Frame"); ind.Size=UDim2.fromOffset(36,36); ind.BackgroundColor3=Color3.fromRGB(18,18,18); ind.BorderSizePixel=0; ind.Parent=mc
-local ic2=Instance.new("UICorner"); ic2.CornerRadius=UDim.new(1,0); ic2.Parent=ind
-local it=Instance.new("TextLabel"); it.Size=UDim2.fromScale(1,1); it.BackgroundTransparency=1; it.BorderSizePixel=0; it.FontFace=Font.new("rbxassetid://12187365364",Enum.FontWeight.SemiBold); it.Text="??"; it.TextSize=15; it.TextColor3=Color3.fromRGB(245,245,245); it.TextXAlignment=Enum.TextXAlignment.Center; it.TextYAlignment=Enum.TextYAlignment.Center; it.Parent=ind
 
-TS:Create(m, TweenInfo.new(0.55, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), { Position = UDim2.new(0.5,-244,0.5,-22) }):Play()
-print("Notification: 386x64 24px r | Edit Menu: 488x44 34px r | Liquid Glass Active")
+local ind = Instance.new("Frame"); ind.Size = UDim2.fromOffset(36,36)
+ind.BackgroundColor3 = Color3.fromRGB(18,18,18); ind.BorderSizePixel = 0; ind.Parent = mc
+local ic2 = Instance.new("UICorner"); ic2.CornerRadius = UDim.new(1,0); ic2.Parent = ind
+
+local ch = Instance.new("ImageLabel")
+ch.Size = UDim2.fromOffset(26, 26); ch.Position = UDim2.fromOffset(7, 5)
+ch.BackgroundTransparency = 1; ch.BorderSizePixel = 0
+ch.Image = "rbxassetid://103603118195781"
+ch.ImageColor3 = Color3.fromRGB(245,245,245)
+ch.ScaleType = Enum.ScaleType.Fit; ch.Parent = ind
+
+TS:Create(m, TweenInfo.new(0.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), { Position = UDim2.new(0.5,-244,0.5,-22) }):Play()
+print("=== UnaliveUI Final Demo Loaded ===")
 return { Notification = n, EditMenu = m }
