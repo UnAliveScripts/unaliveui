@@ -53,13 +53,6 @@ local ms=Instance.new("Frame",m);ms.Size=UDim2.new(1,4,1,4);ms.Position=UDim2.fr
 local mc2=Instance.new("Frame",m);mc2.Size=UDim2.fromScale(1,1);mc2.BackgroundColor3=Color3.fromRGB(15,17,22);mc2.BackgroundTransparency=0.08;mc2.BorderSizePixel=0;mc2.ZIndex=1;Instance.new("UICorner",mc2).CornerRadius=UDim.new(0,34)
 local mb=Instance.new("Frame",m);mb.Size=UDim2.new(1,-34,1,-34);mb.Position=UDim2.fromOffset(17,17);mb.BackgroundTransparency=1;mb.BorderSizePixel=0;mb.ZIndex=0;blur(mb)
 
--- SelectionPill (34x28, #050508, 85% opacity)
-local sp=Instance.new("Frame",m);sp.Name="SelectionPill"
-sp.Size=UDim2.fromOffset(34,28);sp.Position=UDim2.fromOffset(20,8)
-sp.BackgroundColor3=Color3.fromRGB(5,5,8);sp.BackgroundTransparency=0.15
-sp.BorderSizePixel=0;sp.ZIndex=5;sp.Visible=true
-Instance.new("UICorner",sp).CornerRadius=UDim.new(1,0)
-
 local mc=Instance.new("Frame",m);mc.Size=UDim2.fromScale(1,1);mc.BackgroundTransparency=1;mc.BorderSizePixel=0;mc.ZIndex=3
 local ml=Instance.new("UIListLayout",mc);ml.FillDirection=Enum.FillDirection.Horizontal;ml.VerticalAlignment=Enum.VerticalAlignment.Center;ml.Padding=UDim.new(0,0)
 Instance.new("UIPadding",mc).PaddingLeft=UDim.new(0,20);Instance.new("UIPadding",mc).PaddingRight=UDim.new(0,4)
@@ -70,41 +63,12 @@ local function addItem(t,w,tw,sep,dest)
     if sep then local s=Instance.new("Frame",a);s.Size=UDim2.fromOffset(1,18);s.Position=UDim2.fromOffset(0,0);s.BackgroundColor3=Color3.fromRGB(255,255,255);s.BackgroundTransparency=0.8;s.BorderSizePixel=0 end
     local l=Instance.new("TextLabel",a);l.Size=UDim2.fromOffset(tw,18);l.Position=UDim2.fromOffset(sep and 17 or 0,0);l.BackgroundTransparency=1;l.BorderSizePixel=0;l.FontFace=Font.new("rbxassetid://12187365364");l.Text=t;l.TextSize=15;l.TextColor3=dest and Color3.fromRGB(255,66,84)or Color3.fromRGB(245,245,245);l.TextXAlignment=Enum.TextXAlignment.Left
     return a,l end
-
-addItem("Farm",50,34,false,false)
-addItem("Shop",68,35,true,false)
-addItem("Steal",67,34,true,false)
-addItem("Spawn",78,45,true,true)
-addItem("Config",77,44,true,false)
-addItem("Settings",88,55,true,false)
-
--- Selection click logic (iOS 26 spring)
-local items={};local selIdx=1;local defC=Color3.fromRGB(245,245,245);local selC=Color3.fromRGB(255,80,100)
-local rx=20
-for _,c in pairs(mc:GetChildren())do
-    if c:IsA("Frame")then
-        local l=c:FindFirstChildOfClass("TextLabel")
-        if l then
-            local iw=c.Size.X.Offset;local ix=rx;rx=rx+iw;local isD=(l.Text=="Spawn")
-            table.insert(items,{X=ix,W=iw,Label=l,IsD=isD})
-            local hb=Instance.new("ImageButton",c);hb.BackgroundTransparency=1;hb.BorderSizePixel=0;hb.Size=UDim2.fromScale(1,1);hb.ZIndex=10
-            hb.MouseButton1Click:Connect(function()
-                local newIdx=#items
-                for i,e in ipairs(items)do if e.Label==l then newIdx=i;break end end
-                if selIdx==newIdx then return end;selIdx=newIdx
-                for _,e in ipairs(items)do e.Label.TextColor3=e.IsD and Color3.fromRGB(255,66,84)or defC end
-                l.TextColor3=selC
-                T:Create(sp,TweenInfo.new(0.45,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Position=UDim2.fromOffset(ix,8)}):Play()end)end end end
-
--- Default: Farm selected
-items[1].Label.TextColor3=selC
-sp.Position=UDim2.fromOffset(items[1].X,8)
+addItem("Farm",50,34,false,false);addItem("Shop",68,35,true,false);addItem("Steal",67,34,true,false);addItem("Spawn",78,45,true,true);addItem("Config",77,44,true,false);addItem("Settings",88,55,true,false)
 
 -- Indicator
 local ind=Instance.new("Frame",m);ind.Size=UDim2.fromOffset(36,36);ind.Position=UDim2.fromOffset(448,4);ind.BackgroundColor3=Color3.fromRGB(18,18,18);ind.BorderSizePixel=0;ind.ZIndex=6
 Instance.new("UICorner",ind).CornerRadius=UDim.new(1,0)
 local ch=Instance.new("ImageLabel",ind);ch.Size=UDim2.fromOffset(16,16);ch.Position=UDim2.fromOffset(10,10);ch.BackgroundTransparency=1;ch.BorderSizePixel=0;ch.Image="rbxassetid://103603118195781";ch.ImageColor3=Color3.fromRGB(245,245,245);ch.ScaleType=Enum.ScaleType.Fit
-
 T:Create(m,TweenInfo.new(0.4,Enum.EasingStyle.Exponential,Enum.EasingDirection.Out),{Position=UDim2.new(0.5,-244,0.5,-22)}):Play()
 
 -- Alert
