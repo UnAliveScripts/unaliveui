@@ -10,6 +10,7 @@ return {
     UnAlivelogo = "rbxassetid://127922205331150",
     xmark = "rbxassetid://93520763686656",
     checkmark = "rbxassetid://118333468121914",
+    info = "rbxassetid://134900376381669",
     ["slider-thumb"] = "rbxassetid://109321922977357",
     ["toggle-on"] = "rbxassetid://138068434560383",
     ["toggle-off"] = "rbxassetid://84345480243560",

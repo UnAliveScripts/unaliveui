@@ -1,5 +1,5 @@
 local components = {}
-local names = { "Window", "Button", "Toggle", "Slider", "Label", "TextField", "Stepper", "Notification", "Icon", "Page", "Row", "EditMenu" }
+local names = { "Window", "Button", "Toggle", "Slider", "Label", "TextField", "Stepper", "StepperPill", "Pulldown", "TrailingAccessories", "Notification", "Icon", "Page", "Row", "EditMenu" }
 for _, n in ipairs(names) do
     local mod = _G["__unaliveui_components_" .. n]
     if mod then

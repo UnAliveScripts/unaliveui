@@ -16,7 +16,7 @@ _G.__unaliveui_blur = load("core/blur.lua")
 local services = load("core/services.lua") or {}
 local utility = load("core/utility.lua") or {}
 
-local list = { Window = "components/Window.lua", Button = "components/Button.lua", Toggle = "components/Toggle.lua", Slider = "components/Slider.lua", Label = "components/Label.lua", TextField = "components/TextField.lua", Stepper = "components/Stepper.lua", Notification = "components/Notification.lua", Icon = "components/Icon.lua", Page = "components/Page.lua", Row = "components/Row.lua", EditMenu = "components/EditMenu.lua" }
+local list = { Window = "components/Window.lua", Button = "components/Button.lua", Toggle = "components/Toggle.lua", Slider = "components/Slider.lua", Label = "components/Label.lua", TextField = "components/TextField.lua", Stepper = "components/Stepper.lua", StepperPill = "components/StepperPill.lua", Pulldown = "components/Pulldown.lua", TrailingAccessories = "components/TrailingAccessories.lua", Notification = "components/Notification.lua", Icon = "components/Icon.lua", Page = "components/Page.lua", Row = "components/Row.lua", EditMenu = "components/EditMenu.lua" }
 for n, p in pairs(list) do
     local m = load(p)
     if m then _G["__unaliveui_components_" .. n] = m end
