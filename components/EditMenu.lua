@@ -195,18 +195,16 @@ return function(self, props)
 
 	Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
 
-	local it = Instance.new("TextLabel")
-	it.Size = UDim2.fromScale(1, 1)
-	it.BackgroundTransparency = 1
-	it.BorderSizePixel = 0
-	it.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold)
-	it.Text = "??"
-	it.TextSize = 15
-	it.TextColor3 = Color3.fromRGB(245, 245, 245)
-	it.TextXAlignment = Enum.TextXAlignment.Center
-	it.TextYAlignment = Enum.TextYAlignment.Center
-	it.ZIndex = 3
-	it.Parent = ind
+	local ii = Instance.new("ImageLabel")
+	ii.Size = UDim2.fromOffset(18, 18)
+	ii.Position = UDim2.fromOffset(9, 9)
+	ii.BackgroundTransparency = 1
+	ii.BorderSizePixel = 0
+	ii.Image = "rbxassetid://103603118195781"
+	ii.ImageColor3 = Color3.fromRGB(245, 245, 245)
+	ii.ScaleType = Enum.ScaleType.Fit
+	ii.ZIndex = 3
+	ii.Parent = ind
 
 	local obj = {
 		Type = "EditMenu",
