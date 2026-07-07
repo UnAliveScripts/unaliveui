@@ -1,51 +1,55 @@
 --[[
-	UnAliveUI — TextField Component
+	UnAliveUI — SearchField Component
 	
-	Input field with placeholder, focus glow, and search icon. Dark Alert theme.
+	Figma 1:1 search bar with pill shape, magnifier icon, clear button.
+	Dark Alert theme (#12141a at 8%).
+	
+	Usage:
+		local sf = UI:New("TextField", { Placeholder = "Search" })
+		sf:Parent(gui)
 --]]
 
-local TS = game:GetService("TweenService")
 local C = _G.__unaliveui_creator.Create
 local icons = _G.__unaliveui_icons or {}
 
 return function(self, props)
 	props = props or {}; props.Placeholder = props.Placeholder or "Search"
 
-	local dark = Color3.fromRGB(18, 20, 26)
+	local dark = Color3.fromRGB(18, 20, 26); local white = Color3.fromRGB(255, 255, 255)
 
-	local c = C("Frame")({ Name = "TextField", BackgroundColor3 = dark, BackgroundTransparency = 0.08,
-		BorderSizePixel = 0, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 23),
-		C("UICorner")({ CornerRadius = UDim.new(0, 6) }),
-		C("ImageLabel")({ Name = "Icon", BackgroundTransparency = 1, BorderSizePixel = 0,
+	local c = C("Frame")({
+		Name = "SearchField", Size = UDim2.fromOffset(122, 26),
+		BackgroundColor3 = dark, BackgroundTransparency = 0.08,
+		BorderSizePixel = 0, ZIndex = 50, ClipsDescendants = true,
+		C("UICorner")({ CornerRadius = UDim.new(0, 13) }),
+		C("UIStroke")({ Color = white, Transparency = 0.92, Thickness = 0.5 }),
+		-- Search icon
+		C("ImageLabel")({ Name = "Icon", Size = UDim2.fromOffset(16, 16), Position = UDim2.fromOffset(8, 5),
+			BackgroundTransparency = 1, BorderSizePixel = 0,
 			Image = icons.search or "rbxassetid://117204739779559",
-			Size = UDim2.fromOffset(14, 14), Position = UDim2.fromOffset(6, 4.5), ImageColor3 = Color3.fromRGB(82, 82, 100) }),
-		C("TextBox")({ Name = "Input", BackgroundTransparency = 1, BorderSizePixel = 0,
-			FontFace = Font.new("rbxassetid://12187365364"),
-			PlaceholderText = props.Placeholder, PlaceholderColor3 = Color3.fromRGB(72, 72, 88),
-			Text = props.Value or "", TextSize = 13, TextColor3 = Color3.fromRGB(225, 225, 234), TextEditable = true,
-			Size = UDim2.fromOffset(170, 23), Position = UDim2.fromOffset(24, 0), ClearTextOnFocus = false }),
+			ImageColor3 = Color3.fromRGB(200, 200, 200), ScaleType = Enum.ScaleType.Fit, ZIndex = 2 }),
+		-- Text
+		C("TextLabel")({ Name = "Label", Size = UDim2.fromOffset(74, 16), Position = UDim2.fromOffset(26, 5),
+			BackgroundTransparency = 1, BorderSizePixel = 0, FontFace = Font.new("rbxassetid://12187365364"),
+			Text = props.Placeholder, TextSize = 13, TextColor3 = Color3.fromRGB(245, 245, 245),
+			TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 2 }),
+		-- Clear button
+		C("ImageButton")({ Name = "Clear", Size = UDim2.fromOffset(16, 16), Position = UDim2.fromOffset(100, 5),
+			BackgroundTransparency = 1, BorderSizePixel = 0, AutoButtonColor = false, ZIndex = 2,
+			Image = "rbxassetid://78668603799563",
+			ImageColor3 = Color3.fromRGB(138, 138, 138), ScaleType = Enum.ScaleType.Fit }),
 	})
 
-	local input = c.__instance:FindFirstChild("Input")
-	local icon = c.__instance:FindFirstChild("Icon")
+	local inst = c.__instance
+	local clearBtn = inst:FindFirstChild("Clear")
+	local label = inst:FindFirstChild("Label")
 
-	input.Focused:Connect(function()
-		TS:Create(c.__instance, TweenInfo.new(0.2, Enum.EasingStyle.Exponential), {
-			BackgroundColor3 = Color3.fromRGB(30, 32, 38),
-		}):Play()
-		if icon then TS:Create(icon, TweenInfo.new(0.2), { ImageColor3 = Color3.fromRGB(118, 118, 142) }):Play() end
-	end)
-	input.FocusLost:Connect(function()
-		TS:Create(c.__instance, TweenInfo.new(0.2, Enum.EasingStyle.Exponential), {
-			BackgroundColor3 = dark, BackgroundTransparency = 0.08,
-		}):Play()
-		if icon then TS:Create(icon, TweenInfo.new(0.2), { ImageColor3 = Color3.fromRGB(82, 82, 100) }):Play() end
-		if props.ValueChanged then props.Value = input.Text; task.spawn(props.ValueChanged, obj, input.Text) end
+	clearBtn.MouseButton1Click:Connect(function()
+		if props.ValueChanged then task.spawn(props.ValueChanged, obj, "") end
 	end)
 
-	local obj = { Type = "TextField", __instance = c.__instance }
+	local obj = { Type = "TextField", __instance = inst }
 	function obj:Parent(p) c.Parent = p end
-	function obj:SetValue(v) input.Text = v end
-	function obj:SetPlaceholder(v) input.PlaceholderText = v end
+	function obj:SetPlaceholder(v) label.Text = v end
 	return obj
 end
