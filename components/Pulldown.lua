@@ -1,20 +1,33 @@
+--[[
+	UnAliveUI — Pulldown Component
+	
+	Dropdown menu with scrolling item list.
+	
+	Usage:
+		local pd = UI.Components.Pulldown(UI, {
+			Label = "Pets",
+			Items = { "Item1", "Item2" },
+			OnSelected = function(name) print(name) end,
+		})
+		pd.Parent(frame)
+--]]
+
 local TS = game:GetService("TweenService")
 local C = _G.__unaliveui_creator.Create
-local icons = _G.__unaliveui_icons or {}
 
 return function(self, props)
 	props = props or {}
 	props.Items = props.Items or {}
 	props.Label = props.Label or "Pulldown"
 
+	local dark = Color3.fromRGB(18, 20, 26)
 	local white = Color3.fromRGB(255, 255, 255)
 	local blue = Color3.fromRGB(0, 136, 255)
 	local darkText = Color3.fromRGB(220, 220, 220)
 	local selectedLabel = nil
 	local isOpen = false
-	local itemButtons = {}
 
-	local c = C("Frame")({
+	local container = C("Frame")({
 		Name = "Pulldown",
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
@@ -30,17 +43,16 @@ return function(self, props)
 			Size = UDim2.fromOffset(100, 24),
 			Text = "",
 			ZIndex = 51,
-
 			C("UICorner")({ CornerRadius = UDim.new(0, 6) }),
 			C("UIStroke")({ Color = white, Transparency = 0.85, Thickness = 0.5 }),
 
 			C("TextLabel")({
 				Name = "Label",
+				Size = UDim2.fromOffset(56, 24),
+				Position = UDim2.fromOffset(12, 0),
 				BackgroundTransparency = 1,
 				BorderSizePixel = 0,
 				FontFace = Font.new("rbxassetid://12187365364"),
-				Size = UDim2.fromOffset(56, 24),
-				Position = UDim2.fromOffset(12, 0),
 				Text = props.Label,
 				TextSize = 13,
 				TextColor3 = white,
@@ -50,23 +62,23 @@ return function(self, props)
 
 			C("ImageLabel")({
 				Name = "Chevron",
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0,
-				Image = icons["chevron-down"],
-				ImageColor3 = white,
 				Size = UDim2.fromOffset(24, 24),
 				Position = UDim2.fromOffset(76, 0),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				Image = "rbxassetid://84215348315149",
+				ImageColor3 = white,
 			}),
 		}),
 
 		-- Menu
 		C("Frame")({
 			Name = "Menu",
-			BackgroundColor3 = Color3.fromRGB(18, 20, 26),
+			BackgroundColor3 = dark,
 			BackgroundTransparency = 0.08,
 			BorderSizePixel = 0,
 			Size = UDim2.fromOffset(95, 0),
-			Position = UDim2.fromOffset(0, 30),
+			Position = UDim2.fromOffset(0, 28),
 			Visible = false,
 			ClipsDescendants = true,
 			ZIndex = 51,
@@ -76,22 +88,20 @@ return function(self, props)
 
 			C("Frame")({
 				Name = "Glass",
-				BackgroundColor3 = Color3.fromRGB(18, 20, 26),
+				Size = UDim2.fromScale(1, 1),
+				BackgroundColor3 = dark,
 				BackgroundTransparency = 0.85,
 				BorderSizePixel = 0,
-				Size = UDim2.fromScale(1, 1),
 				ZIndex = 51,
-
 				C("UICorner")({ CornerRadius = UDim.new(0, 13) }),
 			}),
 
-			-- Scroller
 			C("ScrollingFrame")({
 				Name = "ItemsScroller",
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0,
 				Size = UDim2.new(1, -4, 1, 0),
 				Position = UDim2.fromOffset(2, 0),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
 				ZIndex = 52,
 				ScrollBarThickness = 4,
 				ScrollBarImageColor3 = Color3.fromRGB(160, 160, 160),
@@ -107,40 +117,37 @@ return function(self, props)
 					Padding = UDim.new(0, 0),
 					HorizontalAlignment = Enum.HorizontalAlignment.Center,
 				}),
-
 				C("UIPadding")({ PaddingTop = UDim.new(0, 5) }),
 			}),
 		}),
 	})
 
-	local menu = c.__instance:FindFirstChild("Menu")
+	local inst = container.__instance
+	local menu = inst:FindFirstChild("Menu")
 	local scroller = menu:FindFirstChild("ItemsScroller")
-	local btn = c.__instance:FindFirstChild("PullDownButton")
+	local btn = inst:FindFirstChild("PullDownButton")
 	local chev = btn:FindFirstChild("Chevron")
-
-	-- Auto-canvas resize
 	local layout = scroller:FindFirstChildOfClass("UIListLayout")
 
-	local function uc()
+	local function updateCanvas()
 		scroller.CanvasSize = UDim2.fromOffset(
 			0,
 			math.max(layout.AbsoluteContentSize.Y + 10, scroller.AbsoluteSize.Y + 10)
 		)
 	end
+	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvas)
 
-	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(uc)
-
-	-- Add item
 	local function addItem(name, selectIt)
-		local item = Instance.new("TextButton", scroller)
+		local item = Instance.new("TextButton")
 		item.Size = UDim2.fromOffset(71, 24)
 		item.Text = ""
 		item.AutoButtonColor = false
 		item.BackgroundTransparency = 1
 		item.BorderSizePixel = 0
 		item.ZIndex = 53
+		item.Parent = scroller
 
-		local selBg = Instance.new("Frame", item)
+		local selBg = Instance.new("Frame")
 		selBg.Name = "SelBg"
 		selBg.Size = UDim2.fromOffset(85, 24)
 		selBg.Position = UDim2.fromOffset(-7, 0)
@@ -148,10 +155,10 @@ return function(self, props)
 		selBg.BackgroundTransparency = selectIt and 0.2 or 1
 		selBg.BorderSizePixel = 0
 		selBg.ZIndex = 53
-
+		selBg.Parent = item
 		Instance.new("UICorner", selBg).CornerRadius = UDim.new(0, 8)
 
-		local label = Instance.new("TextLabel", item)
+		local label = Instance.new("TextLabel")
 		label.Size = UDim2.fromOffset(71, 24)
 		label.BackgroundTransparency = 1
 		label.BorderSizePixel = 0
@@ -162,33 +169,25 @@ return function(self, props)
 		label.TextColor3 = selectIt and white or darkText
 		label.TextXAlignment = Enum.TextXAlignment.Left
 		label.TextYAlignment = Enum.TextYAlignment.Center
+		label.Parent = item
 
-		if selectIt then
-			selectedLabel = label
-		end
+		if selectIt then selectedLabel = label end
 
 		item.MouseButton1Click:Connect(function()
 			if selectedLabel and selectedLabel ~= label then
 				selectedLabel.TextColor3 = darkText
-
 				local bg = selectedLabel.Parent:FindFirstChild("SelBg")
-				if bg then
-					bg.BackgroundTransparency = 1
-				end
+				if bg then bg.BackgroundTransparency = 1 end
 			end
-
 			if selectedLabel ~= label then
 				label.TextColor3 = white
 				selBg.BackgroundTransparency = 0.2
 				selectedLabel = label
-
-				if props.OnSelected then
-					task.spawn(props.OnSelected, name)
-				end
+				if props.OnSelected then task.spawn(props.OnSelected, name) end
 			end
 		end)
 
-		uc()
+		updateCanvas()
 		return item
 	end
 
@@ -198,42 +197,27 @@ return function(self, props)
 		local sel = type(data) == "table" and data.Selected or false
 		addItem(name, sel)
 	end
-
-	uc()
+	updateCanvas()
 
 	-- Toggle
 	local ti = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-
 	btn.MouseButton1Click:Connect(function()
 		isOpen = not isOpen
-
 		if isOpen then
 			menu.Size = UDim2.fromOffset(95, 0)
 			menu.Visible = true
-
 			TS:Create(menu, ti, { Size = UDim2.fromOffset(95, 226) }):Play()
-			if chev then
-				TS:Create(chev, ti, { Rotation = 180 }):Play()
-			end
+			TS:Create(chev, ti, { Rotation = 180 }):Play()
 		else
 			local t = TS:Create(menu, ti, { Size = UDim2.fromOffset(95, 0) })
-
-			t.Completed:Connect(function()
-				menu.Visible = false
-			end)
-
+			t.Completed:Connect(function() menu.Visible = false end)
 			t:Play()
-
-			if chev then
-				TS:Create(chev, ti, { Rotation = 0 }):Play()
-			end
+			TS:Create(chev, ti, { Rotation = 0 }):Play()
 		end
 	end)
 
-	local obj = { Type = "Pulldown", __instance = c.__instance }
-
-	function obj.Parent(p) c.Parent = p end
+	local obj = { Type = "Pulldown", __instance = inst }
+	function obj.Parent(p) container.Parent = p end
 	function obj:AddItem(name, sel) addItem(name, sel) end
-
 	return obj
 end

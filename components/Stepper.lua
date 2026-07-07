@@ -1,109 +1,124 @@
+--[[
+	UnAliveUI — Stepper Component
+	
+	Numeric stepper with up/down arrows, dark Alert theme.
+	
+	Usage:
+		local st = UI.Components.Stepper(UI, {
+			Value = 5000, Step = 500,
+			Minimum = 0, Maximum = 99999,
+			ValueChanged = function(self, v) print(v) end,
+		})
+		st.Parent(frame)
+--]]
+
 local TS = game:GetService("TweenService")
 local C = _G.__unaliveui_creator.Create
-local icons = _G.__unaliveui_icons or {}
 
 return function(self, props)
 	props = props or {}
 	props.Minimum = props.Minimum or 0
-	props.Maximum = props.Maximum or 100
-	props.Step = props.Step or 1
-	props.Value = props.Value or 0
+	props.Maximum = props.Maximum or 99999
+	props.Step = props.Step or 500
+	props.Value = props.Value or 5000
 
-	local c = C("Frame")({
+	local dark = Color3.fromRGB(18, 20, 26)
+	local white = Color3.fromRGB(255, 255, 255)
+
+	local container = C("Frame")({
 		Name = "Stepper",
-		BackgroundTransparency = 1,
+		Size = UDim2.fromOffset(100, 24),
+		BackgroundColor3 = dark,
+		BackgroundTransparency = 0.08,
 		BorderSizePixel = 0,
-		AutomaticSize = Enum.AutomaticSize.XY,
-		Size = UDim2.fromOffset(0, 23),
-	})
-
-	local dn = C("ImageButton")({
-		Name = "Down",
-		AutoButtonColor = false,
-		BackgroundColor3 = Color3.fromRGB(44, 44, 50),
-		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(0, 0),
-		Size = UDim2.fromOffset(22, 23),
-		Image = icons["chevron-down"] or "rbxassetid://84215348315149",
-		ImageColor3 = Color3.fromRGB(255, 255, 255),
-		ImageTransparency = 0.3,
-		Parent = c.__instance,
+		ClipsDescendants = true,
+		ZIndex = 50,
 
 		C("UICorner")({ CornerRadius = UDim.new(0, 6) }),
+		C("UIStroke")({ Color = white, Transparency = 0.85, Thickness = 0.5 }),
+
+		-- Value label
+		C("TextLabel")({
+			Name = "Value",
+			Size = UDim2.fromOffset(76, 16),
+			Position = UDim2.fromOffset(8, 4),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium),
+			Text = tostring(props.Value),
+			TextSize = 13,
+			TextColor3 = white,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 2,
+		}),
+
+		-- Up button
+		C("ImageButton")({
+			Name = "Up",
+			Size = UDim2.fromOffset(20, 12),
+			Position = UDim2.fromOffset(80, 0),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			ZIndex = 3,
+
+			C("ImageLabel")({
+				Name = "Icon",
+				Size = UDim2.fromOffset(14, 14),
+				Position = UDim2.fromOffset(3, -1),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				Image = "rbxassetid://137296891812002",
+				ImageColor3 = white,
+				ImageTransparency = 0.2,
+			}),
+		}),
+
+		-- Down button
+		C("ImageButton")({
+			Name = "Down",
+			Size = UDim2.fromOffset(20, 12),
+			Position = UDim2.fromOffset(80, 12),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			ZIndex = 3,
+
+			C("ImageLabel")({
+				Name = "Icon",
+				Size = UDim2.fromOffset(14, 14),
+				Position = UDim2.fromOffset(3, -1),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				Image = "rbxassetid://84215348315149",
+				ImageColor3 = white,
+				ImageTransparency = 0.2,
+			}),
+		}),
 	})
 
-	local v = C("TextLabel")({
-		Name = "Value",
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		FontFace = Font.new("rbxassetid://12187365364"),
-		Text = tostring(props.Value),
-		TextSize = 15,
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		Position = UDim2.fromOffset(22, 0),
-		Size = UDim2.fromOffset(36, 23),
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextYAlignment = Enum.TextYAlignment.Center,
-		Parent = c.__instance,
-	})
+	local inst = container.__instance
+	local valLbl = inst:FindFirstChild("Value")
+	local upBtn = inst:FindFirstChild("Up")
+	local downBtn = inst:FindFirstChild("Down")
 
-	local up = C("ImageButton")({
-		Name = "Up",
-		AutoButtonColor = false,
-		BackgroundColor3 = Color3.fromRGB(44, 44, 50),
-		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(58, 0),
-		Size = UDim2.fromOffset(22, 23),
-		Image = icons["chevron-up"] or "rbxassetid://137296891812002",
-		ImageColor3 = Color3.fromRGB(255, 255, 255),
-		ImageTransparency = 0.3,
-		Parent = c.__instance,
-
-		C("UICorner")({ CornerRadius = UDim.new(0, 6) }),
-	})
-
-	local function ud()
-		v.Text = tostring(props.Value)
+	local function updateLabel()
+		valLbl.Text = tostring(props.Value)
 	end
 
-	up.MouseButton1Down:Connect(function()
-		TS:Create(up.__instance, TweenInfo.new(0.08), { ImageTransparency = 0 }):Play()
-	end)
-
-	up.MouseButton1Up:Connect(function()
-		TS:Create(up.__instance, TweenInfo.new(0.12), { ImageTransparency = 0.3 }):Play()
-	end)
-
-	up.MouseButton1Click:Connect(function()
+	upBtn.MouseButton1Click:Connect(function()
 		props.Value = math.min(props.Value + props.Step, props.Maximum)
-		ud()
-
-		if props.ValueChanged then
-			task.spawn(props.ValueChanged, obj, props.Value)
-		end
+		updateLabel()
+		if props.ValueChanged then task.spawn(props.ValueChanged, obj, props.Value) end
 	end)
 
-	dn.MouseButton1Down:Connect(function()
-		TS:Create(dn.__instance, TweenInfo.new(0.08), { ImageTransparency = 0 }):Play()
-	end)
-
-	dn.MouseButton1Up:Connect(function()
-		TS:Create(dn.__instance, TweenInfo.new(0.12), { ImageTransparency = 0.3 }):Play()
-	end)
-
-	dn.MouseButton1Click:Connect(function()
+	downBtn.MouseButton1Click:Connect(function()
 		props.Value = math.max(props.Value - props.Step, props.Minimum)
-		ud()
-
-		if props.ValueChanged then
-			task.spawn(props.ValueChanged, obj, props.Value)
-		end
+		updateLabel()
+		if props.ValueChanged then task.spawn(props.ValueChanged, obj, props.Value) end
 	end)
 
-	local obj = { Type = "Stepper", __instance = c.__instance }
-
-	function obj.Parent(p) c.Parent = p end
-	function obj:SetValue(v) props.Value = v; ud() end
-
+	local obj = { Type = "Stepper", __instance = inst }
+	function obj.Parent(p) container.Parent = p end
+	function obj:SetValue(v) props.Value = v; updateLabel() end
+	function obj:GetValue() return props.Value end
 	return obj
 end
