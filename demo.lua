@@ -87,4 +87,45 @@ local function mkB(x,t,s)
     local l=Instance.new("TextLabel",b);l.Size=UDim2.fromScale(1,1);l.BackgroundTransparency=1;l.BorderSizePixel=0;l.FontFace=Font.new("rbxassetid://12187365364",Enum.FontWeight.Medium);l.Text=t;l.TextSize=13;l.TextColor3=s=="D"and Color3.fromRGB(255,56,60)or Color3.fromRGB(0,0,0);l.TextXAlignment=Enum.TextXAlignment.Center;l.TextYAlignment=Enum.TextYAlignment.Center;l.ZIndex=102 end
 mkB(16,"Turn OFF","D");mkB(134,"Keep On","P")
 a.Position=UDim2.new(0.5,-130,0,170);T:Create(a,TweenInfo.new(0.4,Enum.EasingStyle.Exponential,Enum.EasingDirection.Out),{Position=UDim2.new(0.5,-130,0,180)}):Play()
+-- StepperPill (92×32 pill design)
+local sp=Instance.new("Frame",gui);sp.Name="StepperPill";sp.Size=UDim2.fromOffset(92,32);sp.Position=UDim2.new(0.5,-46,0,440);sp.BackgroundTransparency=1;sp.ZIndex=50
+sp.BackgroundColor3=Color3.fromRGB(18,20,26);sp.BackgroundTransparency=0.08;sp.ClipsDescendants=true;sp.BorderSizePixel=0;Instance.new("UICorner",sp).CornerRadius=UDim.new(0,16);Instance.new("UIStroke",sp).Color=Color3.fromRGB(255,255,255);sp.UIStroke.Transparency=0.92;sp.UIStroke.Thickness=0.5
+local dec=Instance.new("ImageButton",sp);dec.AutoButtonColor=false;dec.BackgroundTransparency=1;dec.BorderSizePixel=0;dec.Position=UDim2.fromOffset(0,0);dec.Size=UDim2.fromOffset(46,32);dec.ZIndex=2
+local di=Instance.new("ImageLabel",dec);di.BackgroundTransparency=1;di.BorderSizePixel=0;di.Image="rbxassetid://110147285593118";di.ImageColor3=Color3.fromRGB(255,255,255);di.Size=UDim2.fromOffset(22,22);di.Position=UDim2.fromOffset(12,5)
+local inc=Instance.new("ImageButton",sp);inc.AutoButtonColor=false;inc.BackgroundTransparency=1;inc.BorderSizePixel=0;inc.Position=UDim2.fromOffset(46,0);inc.Size=UDim2.fromOffset(46,32);inc.ZIndex=2
+local ii=Instance.new("ImageLabel",inc);ii.BackgroundTransparency=1;ii.BorderSizePixel=0;ii.Image="rbxassetid://126761302820331";ii.ImageColor3=Color3.fromRGB(255,255,255);ii.Size=UDim2.fromOffset(22,22);ii.Position=UDim2.fromOffset(12,5)
+local sep2=Instance.new("Frame",sp);sep2.Size=UDim2.fromOffset(1,24);sep2.Position=UDim2.fromOffset(45.5,4);sep2.BackgroundColor3=Color3.fromRGB(235,235,245);sep2.BackgroundTransparency=0.7;sep2.BorderSizePixel=0;Instance.new("UICorner",sep2).CornerRadius=UDim.new(0,8)
+local sv=0;dec.MouseButton1Click:Connect(function()sv=sv-1;print("Pill:",sv)end);inc.MouseButton1Click:Connect(function()sv=sv+1;print("Pill:",sv)end)
+
+-- Pulldown with Menu
+local pd=Instance.new("Frame",gui);pd.Name="Pulldown";pd.Size=UDim2.fromOffset(100,260);pd.Position=UDim2.new(0.5,150,0,80);pd.BackgroundTransparency=1;pd.ZIndex=50
+local pb=Instance.new("TextButton",pd);pb.Name="PullDownButton";pb.Size=UDim2.fromOffset(100,24);pb.Text="";pb.BackgroundColor3=Color3.fromRGB(30,32,38);pb.BorderSizePixel=0;pb.ZIndex=51;pb.AutoButtonColor=false;Instance.new("UICorner",pb).CornerRadius=UDim.new(0,6);Instance.new("UIStroke",pb).Color=Color3.fromRGB(255,255,255);pb.UIStroke.Transparency=0.85;pb.UIStroke.Thickness=0.5
+local plbl=Instance.new("TextLabel",pb);plbl.Size=UDim2.fromOffset(56,24);plbl.Position=UDim2.fromOffset(12,0);plbl.BackgroundTransparency=1;plbl.Font=Enum.Font.SourceSans;plbl.Text="Pulldown1";plbl.TextSize=13;plbl.TextColor3=Color3.fromRGB(255,255,255);plbl.TextXAlignment=Enum.TextXAlignment.Left;plbl.TextYAlignment=Enum.TextYAlignment.Center
+local pch=Instance.new("ImageLabel",pb);pch.Size=UDim2.fromOffset(24,24);pch.Position=UDim2.fromOffset(76,0);pch.BackgroundTransparency=1;pch.Image="rbxassetid://84215348315149";pch.ImageColor3=Color3.fromRGB(255,255,255);pch.Name="Chevron"
+local pm=Instance.new("Frame",pd);pm.Name="Menu";pm.Size=UDim2.fromOffset(95,0);pm.Position=UDim2.fromOffset(0,30);pm.BackgroundColor3=Color3.fromRGB(18,20,26);pm.BackgroundTransparency=0.08;pm.BorderSizePixel=0;pm.Visible=false;pm.ClipsDescendants=true;pm.ZIndex=51;Instance.new("UICorner",pm).CornerRadius=UDim.new(0,13);Instance.new("UIStroke",pm).Color=Color3.fromRGB(255,255,255);pm.UIStroke.Transparency=0.88;pm.UIStroke.Thickness=0.5
+local pg=Instance.new("Frame",pm);pg.Size=UDim2.fromScale(1,1);pg.BackgroundColor3=Color3.fromRGB(18,20,26);pg.BackgroundTransparency=0.85;pg.BorderSizePixel=0;pg.ZIndex=51;Instance.new("UICorner",pg).CornerRadius=UDim.new(0,13)
+local ps=Instance.new("ScrollingFrame",pm);ps.Size=UDim2.new(1,-4,1,0);ps.Position=UDim2.fromOffset(2,0);ps.BackgroundTransparency=1;ps.BorderSizePixel=0;ps.ZIndex=52;ps.ScrollBarThickness=4;ps.ScrollBarImageColor3=Color3.fromRGB(160,160,160);ps.TopImage="rbxasset://textures/ui/ScrollBar/top.png";ps.MidImage="rbxasset://textures/ui/ScrollBar/mid.png";ps.BottomImage="rbxasset://textures/ui/ScrollBar/bottom.png";ps.ScrollingDirection=Enum.ScrollingDirection.Y;ps.ElasticBehavior=Enum.ElasticBehavior.Never;ps.ClipsDescendants=true
+local pl=Instance.new("UIListLayout",ps);pl.Padding=UDim.new(0,0);pl.HorizontalAlignment=Enum.HorizontalAlignment.Center
+Instance.new("UIPadding",ps).PaddingTop=UDim.new(0,5)
+local function puc()ps.CanvasSize=UDim2.fromOffset(0,math.max(pl.AbsoluteContentSize.Y+10,ps.AbsoluteSize.Y+10))end
+pl:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(puc)
+local psel=nil;local pnames={"Ice Serpent","Black Dragon","Raccoon","Bald Eagle","Bear","Unicorn","Golden Dragonfly","Monkey","Butterfly"}
+for _,pn in pairs(pnames)do
+    local psel2=pn=="Black Dragon";local pi=Instance.new("TextButton",ps);pi.Size=UDim2.fromOffset(71,24);pi.Text="";pi.AutoButtonColor=false;pi.BackgroundTransparency=1;pi.BorderSizePixel=0;pi.ZIndex=53
+    local psb=Instance.new("Frame",pi);psb.Size=UDim2.fromOffset(85,24);psb.Position=UDim2.fromOffset(-7,0);psb.BackgroundColor3=Color3.fromRGB(0,136,255);psb.BackgroundTransparency=psel2 and 0.2 or 1;psb.BorderSizePixel=0;psb.ZIndex=53;Instance.new("UICorner",psb).CornerRadius=UDim.new(0,8)
+    local pnl=Instance.new("TextLabel",pi);pnl.Size=UDim2.fromOffset(71,24);pnl.BackgroundTransparency=1;pnl.BorderSizePixel=0;pnl.ZIndex=54;pnl.Font=Enum.Font.SourceSans;pnl.Text=pn;pnl.TextSize=13;pnl.TextColor3=psel2 and Color3.fromRGB(255,255,255)or Color3.fromRGB(220,220,220);pnl.TextXAlignment=Enum.TextXAlignment.Left;pnl.TextYAlignment=Enum.TextYAlignment.Center
+    if psel2 then psel=pnl end
+    pi.MouseButton1Click:Connect(function()
+        if psel and psel~=pnl then psel.TextColor3=Color3.fromRGB(220,220,220);local bg=psel.Parent:FindFirstChild("SelBg");if bg then bg.BackgroundTransparency=1 end end
+        if psel~=pnl then pnl.TextColor3=Color3.fromRGB(255,255,255);psb.BackgroundTransparency=0.2;psel=pnl end
+    end)
+end;puc()
+local pis=false;local pti=TweenInfo.new(0.15,Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
+pb.MouseButton1Click:Connect(function()pis=not pis;if pis then pm.Size=UDim2.fromOffset(95,0);pm.Visible=true;T:Create(pm,pti,{Size=UDim2.fromOffset(95,226)}):Play();T:Create(pch,pti,{Rotation=180}):Play()else;local t=T:Create(pm,pti,{Size=UDim2.fromOffset(95,0)});t.Completed:Connect(function()pm.Visible=false end);t:Play();T:Create(pch,pti,{Rotation=0}):Play()end end)
+
+-- Trailing Accessories
+local ta=Instance.new("Frame",gui);ta.Name="TrailingAccessories";ta.Size=UDim2.fromOffset(60,16);ta.Position=UDim2.new(0.5,150,0,110);ta.BackgroundTransparency=1;ta.ZIndex=50
+local tal=Instance.new("TextLabel",ta);tal.Size=UDim2.fromOffset(40,16);tal.Position=UDim2.fromOffset(-1,0);tal.BackgroundTransparency=1;tal.Font=Enum.Font.SourceSans;tal.Text="Label";tal.TextSize=15;tal.TextColor3=Color3.fromRGB(246,246,246);tal.TextTransparency=0.16;tal.TextXAlignment=Enum.TextXAlignment.Right;tal.TextYAlignment=Enum.TextYAlignment.Center
+local tai=Instance.new("ImageLabel",ta);tai.Size=UDim2.fromOffset(16,16);tai.Position=UDim2.fromOffset(44,0);tai.BackgroundTransparency=1;tai.BorderSizePixel=0;tai.Image="rbxassetid://134900376381669";tai.ImageColor3=Color3.fromRGB(246,246,246);tai.ImageTransparency=0.16
+
 print("=== UnaliveUI Figma Demo ===")
