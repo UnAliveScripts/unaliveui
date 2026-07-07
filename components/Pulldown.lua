@@ -10,7 +10,7 @@ local TS = game:GetService("TweenService")
 return function(self, props)
 	props = props or {}; props.Items = props.Items or {}; props.Label = props.Label or "Pulldown"
 	local dark = Color3.fromRGB(18, 20, 26); local white = Color3.fromRGB(255, 255, 255)
-	local blue = Color3.fromRGB(0, 136, 255); local darkText = Color3.fromRGB(220, 220, 220)
+	local darkText = Color3.fromRGB(220, 220, 220); local black = Color3.fromRGB(0, 0, 0)
 	local selectedLabel = nil; local isOpen = false
 
 	local pd = Instance.new("Frame")
@@ -76,26 +76,26 @@ return function(self, props)
 
 		local selBg = Instance.new("Frame", item); selBg.Name = "SelBg"
 		selBg.Size = UDim2.fromOffset(85, 24); selBg.Position = UDim2.fromOffset(-7, 0)
-		selBg.BackgroundColor3 = blue; selBg.BackgroundTransparency = selectIt and 0.2 or 1
+		selBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255); selBg.BackgroundTransparency = selectIt and 0.1 or 1
 		selBg.BorderSizePixel = 0; selBg.ZIndex = 53
 		Instance.new("UICorner", selBg).CornerRadius = UDim.new(0, 8)
 
 		local label = Instance.new("TextLabel", item)
 		label.Size = UDim2.fromOffset(71, 24); label.BackgroundTransparency = 1; label.BorderSizePixel = 0; label.ZIndex = 54
 		label.Font = Enum.Font.SourceSans; label.Text = name; label.TextSize = 13
-		label.TextColor3 = selectIt and white or darkText
+		label.TextColor3 = selectIt and black or darkText
 		label.TextXAlignment = Enum.TextXAlignment.Left; label.TextYAlignment = Enum.TextYAlignment.Center
 
 		if selectIt then selectedLabel = label end
 
 		item.MouseButton1Click:Connect(function()
-			if selectedLabel == label then return end -- can't reselect same item
+			if selectedLabel == label then return end
 			if selectedLabel then
 				selectedLabel.TextColor3 = darkText
 				local bg = selectedLabel.Parent:FindFirstChild("SelBg")
 				if bg then bg.BackgroundTransparency = 1 end
 			end
-			label.TextColor3 = white; selBg.BackgroundTransparency = 0.2; selectedLabel = label
+			label.TextColor3 = black; selBg.BackgroundTransparency = 0.1; selectedLabel = label
 			if props.OnSelected then task.spawn(props.OnSelected, name) end
 		end)
 		updateCanvas(); return item
