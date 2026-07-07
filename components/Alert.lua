@@ -1,173 +1,111 @@
 --[[
 	UnAliveUI — Alert Component
 	
-	Centered alert dialog with fade in/out animations.
+	Centered alert dialog with expand/contract animation.
 	Configurable title, description, and buttons with callbacks.
+	Blur effect controlled via SetIntensity.
 	
 	Usage:
 		local a = UI:New("Alert")
 		a:Parent(gui)
 		
-		a:Show("Title", "Description", "Btn1", "Btn2",
+		a.Show("Title", "Description", "Btn1", "Btn2",
 			function() print("Btn1 clicked") end,
 			function() print("Btn2 clicked") end
 		)
-		
-		-- Manual API
-		a.SetTitle("New Title")
-		a.SetDescription("New description")
 		a.Dismiss()
+		a.SetTitle("New Title")
+		a.SetDescription("New desc")
 --]]
 
 local TS = game:GetService("TweenService")
 
 return function(self, props)
 	props = props or {}
-
 	local dark = Color3.fromRGB(18, 20, 26); local white = Color3.fromRGB(255, 255, 255)
-	local blur = _G.__unaliveui_blur
-	if not blur then
-		blur = loadstring(game:HttpGet("https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/core/blur.lua"))()
-	end
+	local blurFn = _G.__unaliveui_blur
+	if not blurFn then blurFn = loadstring(game:HttpGet("https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/core/blur.lua"))() end
 
 	local a = Instance.new("Frame")
 	a.Name = "Alert"; a.Size = UDim2.fromOffset(260, 140)
 	a.AnchorPoint = Vector2.new(0.5, 0.5); a.Position = UDim2.new(0.5, 0, 0.5, 0)
-	a.BackgroundTransparency = 1; a.BorderSizePixel = 0; a.ZIndex = 1000; a.ClipsDescendants = true
-	a.Visible = false
-	Instance.new("UICorner", a).CornerRadius = UDim.new(0, 10)
+	a.BackgroundTransparency = 1; a.BorderSizePixel = 0; a.ZIndex = 1000; a.Visible = false
 
 	-- Shadow
-	local aShadow = Instance.new("Frame", a); aShadow.Name = "Shadow"
-	aShadow.Size = UDim2.new(1, 4, 1, 4); aShadow.Position = UDim2.fromOffset(-2, -2)
-	aShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0); aShadow.BackgroundTransparency = 0.78
-	aShadow.BorderSizePixel = 0; aShadow.ZIndex = 98
-	Instance.new("UICorner", aShadow).CornerRadius = UDim.new(0, 26)
+	local sh = Instance.new("Frame", a); sh.Name = "Shadow"
+	sh.Size = UDim2.new(1,4,1,4); sh.Position = UDim2.fromOffset(-2,-2)
+	sh.BackgroundColor3 = Color3.fromRGB(0,0,0); sh.BackgroundTransparency = 0.78
+	sh.BorderSizePixel = 0; sh.ZIndex = 998
+	Instance.new("UICorner", sh).CornerRadius = UDim.new(0, 26)
 
 	-- Background
-	local aBg = Instance.new("Frame", a); aBg.Name = "Background"
-	aBg.Size = UDim2.fromScale(1, 1)
-	aBg.BackgroundColor3 = dark; aBg.BackgroundTransparency = 0.08
-	aBg.BorderSizePixel = 0; aBg.ZIndex = 100
-	Instance.new("UICorner", aBg).CornerRadius = UDim.new(0, 26)
-
-	-- Border
-	local aStroke = Instance.new("UIStroke", aBg)
-	aStroke.Color = white; aStroke.Transparency = 0.88; aStroke.Thickness = 1
+	local bg = Instance.new("Frame", a); bg.Name = "Background"
+	bg.Size = UDim2.fromScale(1,1); bg.BackgroundColor3 = dark; bg.BackgroundTransparency = 0.08
+	bg.BorderSizePixel = 0; bg.ZIndex = 1000; bg.ClipsDescendants = true
+	Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 26)
+	local st = Instance.new("UIStroke", bg); st.Color = white; st.Transparency = 0.88; st.Thickness = 1
 
 	-- Blur
-	local aBlur = Instance.new("Frame", a); aBlur.Name = "BlurPane"
-	aBlur.Size = UDim2.new(1, -20, 1, -20); aBlur.Position = UDim2.fromOffset(10, 10)
-	aBlur.BackgroundTransparency = 1; aBlur.BorderSizePixel = 0; aBlur.ZIndex = 99
-	if blur then task.spawn(function() blur(aBlur) end) end
+	local bp = Instance.new("Frame", bg); bp.Name = "BlurPane"
+	bp.Size = UDim2.new(1, -20, 1, -20); bp.Position = UDim2.fromOffset(10, 10)
+	bp.BackgroundTransparency = 1; bp.BorderSizePixel = 0; bp.ZIndex = 999
+	local bc = blurFn and blurFn(bp)
+	if bc then bc.SetVisibility(false); bc.SetIntensity(1000) end
 
 	-- Title
-	local aTitle = Instance.new("TextLabel", aBg)
-	aTitle.Size = UDim2.fromOffset(216, 16); aTitle.Position = UDim2.fromOffset(22, 20)
-	aTitle.BackgroundTransparency = 1; aTitle.BorderSizePixel = 0
-	aTitle.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold)
-	aTitle.Text = "UnAlive"; aTitle.TextSize = 13; aTitle.TextColor3 = white
-	aTitle.TextXAlignment = Enum.TextXAlignment.Left; aTitle.TextYAlignment = Enum.TextYAlignment.Center
-	aTitle.RichText = true; aTitle.ZIndex = 102
+	local t = Instance.new("TextLabel", bg)
+	t.Size = UDim2.fromOffset(216,16); t.Position = UDim2.fromOffset(22,20)
+	t.BackgroundTransparency = 1; t.FontFace = Font.new("rbxassetid://12187365364",Enum.FontWeight.Bold)
+	t.Text = "UnAlive"; t.TextSize = 13; t.TextColor3 = white
+	t.TextXAlignment = Enum.TextXAlignment.Left; t.TextYAlignment = Enum.TextYAlignment.Center; t.RichText = true; t.ZIndex = 1002
 
 	-- Description
-	local aDesc = Instance.new("TextLabel", aBg)
-	aDesc.Size = UDim2.fromOffset(216, 28); aDesc.Position = UDim2.fromOffset(22, 46)
-	aDesc.BackgroundTransparency = 1; aDesc.BorderSizePixel = 0
-	aDesc.FontFace = Font.new("rbxassetid://12187365364")
-	aDesc.Text = ""; aDesc.TextSize = 11
-	aDesc.TextColor3 = Color3.fromRGB(180, 180, 190)
-	aDesc.TextXAlignment = Enum.TextXAlignment.Left; aDesc.TextYAlignment = Enum.TextYAlignment.Top
-	aDesc.RichText = true; aDesc.ZIndex = 102
+	local d = Instance.new("TextLabel", bg)
+	d.Size = UDim2.fromOffset(216,28); d.Position = UDim2.fromOffset(22,46)
+	d.BackgroundTransparency = 1; d.FontFace = Font.new("rbxassetid://12187365364")
+	d.Text = ""; d.TextSize = 11; d.TextColor3 = Color3.fromRGB(180,180,190)
+	d.TextXAlignment = Enum.TextXAlignment.Left; d.TextYAlignment = Enum.TextYAlignment.Top; d.RichText = true; d.ZIndex = 1002
 
 	-- Button maker
-	local function makeBtn(x, text, destructive, callback)
-		local b = Instance.new("TextButton", aBg)
-		b.AutoButtonColor = false; b.Size = UDim2.fromOffset(110, 32); b.Position = UDim2.fromOffset(x, 92)
-		b.BackgroundTransparency = 1; b.BorderSizePixel = 0; b.Text = ""; b.ZIndex = 102
-		Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
-
-		local bBg = Instance.new("Frame", b)
-		bBg.Size = UDim2.fromScale(1, 1); bBg.BorderSizePixel = 0; bBg.ZIndex = 101
-		bBg.BackgroundColor3 = destructive and Color3.fromRGB(255, 56, 60) or Color3.fromRGB(230, 230, 230)
-		bBg.BackgroundTransparency = destructive and 0.77 or 0
-		Instance.new("UICorner", bBg).CornerRadius = UDim.new(1, 0)
-
-		local bLbl = Instance.new("TextLabel", b)
-		bLbl.Size = UDim2.fromScale(1, 1); bLbl.BackgroundTransparency = 1; bLbl.BorderSizePixel = 0
-		bLbl.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium)
-		bLbl.Text = text; bLbl.TextSize = 13
-		bLbl.TextColor3 = destructive and Color3.fromRGB(255, 56, 60) or Color3.fromRGB(0, 0, 0)
-		bLbl.TextXAlignment = Enum.TextXAlignment.Center; bLbl.TextYAlignment = Enum.TextYAlignment.Center
-		bLbl.ZIndex = 102
-
-		b.MouseButton1Click:Connect(function()
-			if callback then callback() end
-			dismiss()
-		end)
-		return b
+	local function mkBtn(x, text, dest, cb)
+		local b = Instance.new("TextButton", bg)
+		b.AutoButtonColor = false; b.Size = UDim2.fromOffset(110,32); b.Position = UDim2.fromOffset(x,92)
+		b.BackgroundTransparency = 1; b.BorderSizePixel = 0; b.Text = ""; b.ZIndex = 1002
+		Instance.new("UICorner", b).CornerRadius = UDim.new(1,0)
+		local bb = Instance.new("Frame", b); bb.Size = UDim2.fromScale(1,1); bb.BorderSizePixel = 0; bb.ZIndex = 1001
+		bb.BackgroundColor3 = dest and Color3.fromRGB(255,56,60) or Color3.fromRGB(230,230,230)
+		bb.BackgroundTransparency = dest and 0.77 or 0; Instance.new("UICorner", bb).CornerRadius = UDim.new(1,0)
+		local bl = Instance.new("TextLabel", b); bl.Size = UDim2.fromScale(1,1); bl.BackgroundTransparency = 1
+		bl.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium); bl.Text = text; bl.TextSize = 13
+		bl.TextColor3 = dest and Color3.fromRGB(255,56,60) or Color3.fromRGB(0,0,0)
+		bl.TextXAlignment = Enum.TextXAlignment.Center; bl.TextYAlignment = Enum.TextYAlignment.Center; bl.ZIndex = 1002
+		b.MouseButton1Click:Connect(function() if cb then cb() end; hide() end)
 	end
 
-	-- Dismiss with fade out
-	local function dismiss()
-		for _, c in pairs(a:GetDescendants()) do
-			if c:IsA("TextLabel") or c:IsA("TextButton") then
-				TS:Create(c, TweenInfo.new(0.2), { TextTransparency = 1 }):Play()
-			end
-		end
-		TS:Create(a, TweenInfo.new(0.3, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {
-			BackgroundTransparency = 1,
-			Size = UDim2.fromOffset(0, 0),
-		}):Play()
-		task.delay(0.3, function()
-			a.Visible = false
-			a.Size = UDim2.fromOffset(260, 140)
-			a.BackgroundTransparency = 1
-			for _, c in pairs(a:GetDescendants()) do
-				if c:IsA("TextLabel") or c:IsA("TextButton") then c.TextTransparency = 0 end
-			end
-		end)
+	-- Hide (local function, NOT on instance)
+	local hide = function()
+		if bc then bc.SetIntensity(1000); bc.SetVisibility(false) end
+		TS:Create(bg, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Size = UDim2.fromOffset(0, 0) }):Play()
+		TS:Create(sh, TweenInfo.new(0.25), { BackgroundTransparency = 1 }):Play()
+		task.delay(0.25, function() a.Visible = false; bg.Size = UDim2.fromScale(1,1); sh.BackgroundTransparency = 0.78 end)
 	end
 
-	-- Show with fade in
-	function a:Show(title, desc, btn1Label, btn2Label, btn1Cb, btn2Cb)
-		for _, c in pairs(aBg:GetChildren()) do
-			if c:IsA("TextButton") then c:Destroy() end
-		end
-
-		aTitle.Text = title or "UnAlive"
-		aDesc.Text = desc or ""
-		aDesc.Visible = (desc or "") ~= ""
-
-		makeBtn(16, btn1Label or "Turn OFF", true, btn1Cb)
-		makeBtn(134, btn2Label or "Keep On", false, btn2Cb)
-
-		a.Size = UDim2.fromOffset(260, 140)
-		a.BackgroundTransparency = 1
-		a.Visible = true
-
-		TS:Create(a, TweenInfo.new(0.3, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
-			BackgroundTransparency = 0,
-		}):Play()
-
-		for _, c in pairs(a:GetDescendants()) do
-			if c:IsA("TextLabel") or c:IsA("TextButton") then
-				c.TextTransparency = 1
-				TS:Create(c, TweenInfo.new(0.3), { TextTransparency = 0 }):Play()
-			end
-		end
+	-- Show (local function, NOT on instance)
+	local show = function(title, desc, btn1, btn2, cb1, cb2)
+		for _, c in pairs(bg:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
+		t.Text = title or "UnAlive"; d.Text = desc or ""; d.Visible = (desc or "") ~= ""
+		mkBtn(16, btn1 or "Turn OFF", true, cb1); mkBtn(134, btn2 or "Keep On", false, cb2)
+		bg.Size = UDim2.fromOffset(0, 0); a.Visible = true
+		TS:Create(bg, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = UDim2.fromScale(1, 1) }):Play()
+		if bc then bc.SetIntensity(0.1); bc.SetVisibility(true) end
 	end
 
-	-- Static API
-	a.Dismiss = dismiss
-	a.SetTitle = function(t) aTitle.Text = t end
-	a.SetDescription = function(d) aDesc.Text = d; aDesc.Visible = d ~= "" end
-
+	-- Return obj with API functions
 	local obj = { Type = "Alert", __instance = a }
+	obj.Show = show
+	obj.Dismiss = hide
+	obj.SetTitle = function(v) t.Text = v end
+	obj.SetDescription = function(v) d.Text = v; d.Visible = v ~= "" end
 	function obj:Parent(p) a.Parent = p end
-	obj.Show = a.Show
-	obj.Dismiss = a.Dismiss
-	obj.SetTitle = a.SetTitle
-	obj.SetDescription = a.SetDescription
 	return obj
 end
