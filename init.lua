@@ -1,37 +1,90 @@
+--[[
+	UnAliveUI v2.0 — UI Library
+	
+	Usage:
+		local UI = loadstring(game:HttpGet(
+			"https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/init.lua"
+		))()
+		
+		-- Create components
+		local win = UI:New("Window", { Title = "My App" })
+		win:Parent(gui)
+		
+		-- Or direct access
+		local st = UI.Stepper({ Value = 5000 })
+		st:Parent(gui)
+--]]
+
 local URL = "https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/"
 
-local function load(p)
-	local ok, r = pcall(function() return loadstring(game:HttpGet(URL .. p))() end)
-	if not ok then warn("UI: fail " .. p .. " " .. tostring(r)); return nil end
+local function load(path)
+	local ok, r = pcall(function() return loadstring(game:HttpGet(URL .. path))() end)
+	if not ok then warn("UI: fail " .. path .. " " .. tostring(r)); return nil end
 	return r
 end
 
+-- Core
 _G.__unaliveui_icons = load("icons.lua") or {}
+_G.__unaliveui_creator = load("core/creator.lua") or {}
 _G.__unaliveui_blur = load("core/blur.lua")
 
-local componentPaths = {
-	Stepper = "components/Stepper.lua",
-	StepperPill = "components/StepperPill.lua",
-	Pulldown = "components/Pulldown.lua",
-	TrailingAccessories = "components/TrailingAccessories.lua",
-	Notification = "components/Notification.lua",
-	Alert = "components/Alert.lua",
-	EditMenu = "components/EditMenu.lua",
-	WindowPill = "components/WindowPill.lua",
+-- Themes
+_G.__unaliveui_themes_Dark = load("themes/Dark.lua")
+
+-- Animation
+_G.__unaliveui_animation = load("animations/init.lua")
+
+-- Components
+local componentMap = {
+	Window = "Window.lua", WindowPill = "WindowPill.lua",
+	EditMenu = "EditMenu.lua", Stepper = "Stepper.lua",
+	StepperPill = "StepperPill.lua", Pulldown = "Pulldown.lua",
+	TrailingAccessories = "TrailingAccessories.lua",
+	Notification = "Notification.lua", Alert = "Alert.lua",
+	Button = "Button.lua", Toggle = "Toggle.lua",
+	Slider = "Slider.lua", Label = "Label.lua",
+	TextField = "TextField.lua", Icon = "Icon.lua",
+	Page = "Page.lua", Row = "Row.lua",
 }
 
-for n, p in pairs(componentPaths) do
-	local m = load(p)
-	if m then _G["__unaliveui_components_" .. n] = m end
+for name, file in pairs(componentMap) do
+	_G["__unaliveui_components_" .. name] = load("components/" .. file)
 end
 
-local components = load("components/init.lua") or {}
+local registry = load("components/init.lua") or {}
 
-_G.UnAliveUI = {
+-- Build UI object
+local UI = {
 	Icons = _G.__unaliveui_icons,
-	Components = components,
+	Creator = _G.__unaliveui_creator,
 	Blur = _G.__unaliveui_blur,
+	Animation = _G.__unaliveui_animation,
+	Themes = { Dark = _G.__unaliveui_themes_Dark },
 	VERSION = "2.0.0",
 }
 
-return _G.UnAliveUI
+-- Component constructors
+for name, fn in pairs(registry) do
+	UI[name] = function(props)
+		local ok, r = pcall(fn, UI, props or {})
+		if ok then return r end
+	end
+end
+
+-- Generic constructor
+function UI:New(name, props)
+	local fn = registry[name]
+	if fn then
+		local ok, r = pcall(fn, UI, props or {})
+		if ok then return r end
+	end
+end
+
+-- Services
+UI.Services = {}
+local svcNames = { "Players", "TweenService", "UserInputService", "RunService", "HttpService" }
+for _, name in ipairs(svcNames) do
+	UI.Services[name] = game:GetService(name)
+end
+
+return UI

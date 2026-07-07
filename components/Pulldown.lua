@@ -1,92 +1,66 @@
+--[[
+	UnAliveUI — Pulldown Component
+	
+	Dropdown menu with scrolling item list and single selection.
+--]]
+
 local TS = game:GetService("TweenService")
+local C = _G.__unaliveui_creator.Create
 
 return function(self, props)
-	props = props or {}
-	props.Items = props.Items or {}
-	props.Label = props.Label or "Pets"
+	props = props or {}; props.Items = props.Items or {}; props.Label = props.Label or "Pulldown"
+	local dark = Color3.fromRGB(18, 20, 26); local white = Color3.fromRGB(255, 255, 255)
+	local blue = Color3.fromRGB(0, 136, 255); local darkText = Color3.fromRGB(220, 220, 220)
+	local selectedLabel = nil; local isOpen = false
 
-	local dark = Color3.fromRGB(18, 20, 26)
-	local white = Color3.fromRGB(255, 255, 255)
-	local blue = Color3.fromRGB(0, 136, 255)
-	local darkText = Color3.fromRGB(220, 220, 220)
-	local selectedLabel = nil
-	local isOpen = false
+	local c = C("Frame")({ Name = "Pulldown", BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.fromOffset(100, 260), ZIndex = 50,
+		C("TextButton")({ Name = "PullDownButton", AutoButtonColor = false, BackgroundColor3 = Color3.fromRGB(30, 32, 38),
+			BorderSizePixel = 0, Size = UDim2.fromOffset(100, 24), Text = "", ZIndex = 51,
+			C("UICorner")({ CornerRadius = UDim.new(0, 6) }),
+			C("UIStroke")({ Color = white, Transparency = 0.85, Thickness = 0.5 }),
+			C("TextLabel")({ Name = "Label", Size = UDim2.fromOffset(56, 24), Position = UDim2.fromOffset(12, 0),
+				BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364"),
+				Text = props.Label, TextSize = 13, TextColor3 = white, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center }),
+			C("ImageLabel")({ Name = "Chevron", Size = UDim2.fromOffset(24, 24), Position = UDim2.fromOffset(76, 0),
+				BackgroundTransparency = 1, Image = "rbxassetid://84215348315149", ImageColor3 = white }) }),
+		C("Frame")({ Name = "Menu", BackgroundColor3 = dark, BackgroundTransparency = 0.08, BorderSizePixel = 0,
+			Size = UDim2.fromOffset(95, 0), Position = UDim2.fromOffset(0, 28), Visible = false, ClipsDescendants = true, ZIndex = 51,
+			C("UICorner")({ CornerRadius = UDim.new(0, 13) }),
+			C("UIStroke")({ Color = white, Transparency = 0.88, Thickness = 0.5 }),
+			C("Frame")({ Name = "Glass", Size = UDim2.fromScale(1, 1), BackgroundColor3 = dark, BackgroundTransparency = 0.85, BorderSizePixel = 0, ZIndex = 51, C("UICorner")({ CornerRadius = UDim.new(0, 13) }) }),
+			C("ScrollingFrame")({ Name = "ItemsScroller", Size = UDim2.new(1, -4, 1, 0), Position = UDim2.fromOffset(2, 0),
+				BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 52, ScrollBarThickness = 4,
+				ScrollBarImageColor3 = Color3.fromRGB(160, 160, 160),
+				TopImage = "rbxasset://textures/ui/ScrollBar/top.png", MidImage = "rbxasset://textures/ui/ScrollBar/mid.png",
+				BottomImage = "rbxasset://textures/ui/ScrollBar/bottom.png",
+				ScrollingDirection = Enum.ScrollingDirection.Y, ElasticBehavior = Enum.ElasticBehavior.Never, ClipsDescendants = true,
+				C("UIListLayout")({ Padding = UDim.new(0, 0), HorizontalAlignment = Enum.HorizontalAlignment.Center }),
+				C("UIPadding")({ PaddingTop = UDim.new(0, 5) }) }) }),
+	})
 
-	local pd = Instance.new("Frame")
-	pd.Name = "Pulldown"; pd.Size = UDim2.fromOffset(100, 260)
-	pd.BackgroundTransparency = 1; pd.ZIndex = 50
-
-	local btn = Instance.new("TextButton", pd)
-	btn.Name = "PullDownButton"; btn.Size = UDim2.fromOffset(100, 24); btn.Text = ""
-	btn.BackgroundColor3 = Color3.fromRGB(30, 32, 38); btn.BorderSizePixel = 0
-	btn.ZIndex = 51; btn.AutoButtonColor = false
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-	local bs = Instance.new("UIStroke", btn); bs.Color = white; bs.Transparency = 0.85; bs.Thickness = 0.5
-
-	local lbl = Instance.new("TextLabel", btn)
-	lbl.Size = UDim2.fromOffset(56, 24); lbl.Position = UDim2.fromOffset(12, 0)
-	lbl.BackgroundTransparency = 1; lbl.Font = Enum.Font.SourceSans
-	lbl.Text = props.Label; lbl.TextSize = 13; lbl.TextColor3 = white
-	lbl.TextXAlignment = Enum.TextXAlignment.Left; lbl.TextYAlignment = Enum.TextYAlignment.Center
-
-	local chev = Instance.new("ImageLabel", btn)
-	chev.Size = UDim2.fromOffset(24, 24); chev.Position = UDim2.fromOffset(76, 0)
-	chev.BackgroundTransparency = 1; chev.Image = "rbxassetid://84215348315149"
-	chev.ImageColor3 = white; chev.Name = "Chevron"
-
-	local menu = Instance.new("Frame", pd)
-	menu.Size = UDim2.fromOffset(95, 0); menu.Position = UDim2.fromOffset(0, 28)
-	menu.BackgroundColor3 = dark; menu.BackgroundTransparency = 0.08
-	menu.BorderSizePixel = 0; menu.Visible = false; menu.ClipsDescendants = true; menu.ZIndex = 51
-	Instance.new("UICorner", menu).CornerRadius = UDim.new(0, 13)
-	local ms = Instance.new("UIStroke", menu); ms.Color = white; ms.Transparency = 0.88; ms.Thickness = 0.5
-
-	local glass = Instance.new("Frame", menu)
-	glass.Size = UDim2.fromScale(1, 1)
-	glass.BackgroundColor3 = dark; glass.BackgroundTransparency = 0.85
-	glass.BorderSizePixel = 0; glass.ZIndex = 51
-	Instance.new("UICorner", glass).CornerRadius = UDim.new(0, 13)
-
-	local scroller = Instance.new("ScrollingFrame", menu)
-	scroller.Size = UDim2.new(1, -4, 1, 0); scroller.Position = UDim2.fromOffset(2, 0)
-	scroller.BackgroundTransparency = 1; scroller.BorderSizePixel = 0; scroller.ZIndex = 52
-	scroller.ScrollBarThickness = 4; scroller.ScrollBarImageColor3 = Color3.fromRGB(160, 160, 160)
-	scroller.TopImage = "rbxasset://textures/ui/ScrollBar/top.png"
-	scroller.MidImage = "rbxasset://textures/ui/ScrollBar/mid.png"
-	scroller.BottomImage = "rbxasset://textures/ui/ScrollBar/bottom.png"
-	scroller.ScrollingDirection = Enum.ScrollingDirection.Y
-	scroller.ElasticBehavior = Enum.ElasticBehavior.Never; scroller.ClipsDescendants = true
-
-	local layout = Instance.new("UIListLayout", scroller)
-	layout.Padding = UDim.new(0, 0); layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	Instance.new("UIPadding", scroller).PaddingTop = UDim.new(0, 5)
-
+	local menu = c.__instance:FindFirstChild("Menu")
+	local scroller = menu:FindFirstChild("ItemsScroller")
+	local btn = c.__instance:FindFirstChild("PullDownButton")
+	local chev = btn:FindFirstChild("Chevron")
+	local layout = scroller:FindFirstChildOfClass("UIListLayout")
 	local function uc() scroller.CanvasSize = UDim2.fromOffset(0, math.max(layout.AbsoluteContentSize.Y + 10, scroller.AbsoluteSize.Y + 10)) end
 	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(uc)
 
-	for _, data in ipairs(props.Items) do
-		local name = type(data) == "string" and data or data.Label
-		local sel = type(data) == "table" and data.Selected or false
-
+	local function addItem(name, selectIt)
 		local item = Instance.new("TextButton", scroller)
 		item.Size = UDim2.fromOffset(71, 24); item.Text = ""; item.AutoButtonColor = false
 		item.BackgroundTransparency = 1; item.BorderSizePixel = 0; item.ZIndex = 53
-
-		local selBg = Instance.new("Frame", item)
+		local selBg = Instance.new("Frame", item); selBg.Name = "SelBg"
 		selBg.Size = UDim2.fromOffset(85, 24); selBg.Position = UDim2.fromOffset(-7, 0)
-		selBg.BackgroundColor3 = blue; selBg.BackgroundTransparency = sel and 0.2 or 1
+		selBg.BackgroundColor3 = blue; selBg.BackgroundTransparency = selectIt and 0.2 or 1
 		selBg.BorderSizePixel = 0; selBg.ZIndex = 53
 		Instance.new("UICorner", selBg).CornerRadius = UDim.new(0, 8)
-
 		local label = Instance.new("TextLabel", item)
-		label.Size = UDim2.fromOffset(71, 24); label.BackgroundTransparency = 1
+		label.Size = UDim2.fromOffset(71, 24); label.BackgroundTransparency = 1; label.BorderSizePixel = 0; label.ZIndex = 54
 		label.Font = Enum.Font.SourceSans; label.Text = name; label.TextSize = 13
-		label.TextColor3 = sel and white or darkText
+		label.TextColor3 = selectIt and white or darkText
 		label.TextXAlignment = Enum.TextXAlignment.Left; label.TextYAlignment = Enum.TextYAlignment.Center
-		label.ZIndex = 54
-
-		if sel then selectedLabel = label end
-
+		if selectIt then selectedLabel = label end
 		item.MouseButton1Click:Connect(function()
 			if selectedLabel and selectedLabel ~= label then
 				selectedLabel.TextColor3 = darkText
@@ -98,24 +72,27 @@ return function(self, props)
 				if props.OnSelected then task.spawn(props.OnSelected, name) end
 			end
 		end)
+		uc(); return item
+	end
+	for _, data in ipairs(props.Items) do
+		local name = type(data) == "string" and data or data.Label
+		addItem(name, type(data) == "table" and data.Selected or false)
 	end
 	uc()
 
 	local ti = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	btn.MouseButton1Click:Connect(function()
 		isOpen = not isOpen
-		if isOpen then
-			menu.Size = UDim2.fromOffset(95, 0); menu.Visible = true
+		if isOpen then menu.Size = UDim2.fromOffset(95, 0); menu.Visible = true
 			TS:Create(menu, ti, { Size = UDim2.fromOffset(95, 226) }):Play()
 			TS:Create(chev, ti, { Rotation = 180 }):Play()
-		else
-			local t = TS:Create(menu, ti, { Size = UDim2.fromOffset(95, 0) })
+		else local t = TS:Create(menu, ti, { Size = UDim2.fromOffset(95, 0) })
 			t.Completed:Connect(function() menu.Visible = false end); t:Play()
-			TS:Create(chev, ti, { Rotation = 0 }):Play()
-		end
+			TS:Create(chev, ti, { Rotation = 0 }):Play() end
 	end)
 
-	local obj = { Type = "Pulldown", __instance = pd }
-	function obj.Parent(p) pd.Parent = p end
+	local obj = { Type = "Pulldown", __instance = c.__instance }
+	function obj:Parent(p) c.Parent = p end
+	function obj:AddItem(name, sel) addItem(name, sel) end
 	return obj
 end

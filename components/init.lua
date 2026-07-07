@@ -1,5 +1,16 @@
+--[[
+	UnAliveUI — Component Registry
+	
+	Auto-loads all components from _G globals set by init.lua.
+--]]
+
+local names = {
+	"Window", "WindowPill", "EditMenu", "Stepper", "StepperPill",
+	"Pulldown", "TrailingAccessories", "Notification", "Alert",
+	"Button", "Toggle", "Slider", "Label", "TextField", "Icon", "Page", "Row",
+}
+
 local components = {}
-local names = { "Stepper", "StepperPill", "Pulldown", "TrailingAccessories", "Notification", "Alert", "EditMenu", "WindowPill" }
 for _, n in ipairs(names) do
 	local mod = _G["__unaliveui_components_" .. n]
 	if mod then
