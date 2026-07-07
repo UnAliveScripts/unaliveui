@@ -131,7 +131,7 @@ return function(self, props)
 	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(uc)
 
 	-- Add item
-	function c.__instance:AddItem(name, selectIt)
+	local function addItem(name, selectIt)
 		local item = Instance.new("TextButton", scroller)
 		item.Size = UDim2.fromOffset(71, 24)
 		item.Text = ""
@@ -196,7 +196,7 @@ return function(self, props)
 	for _, data in ipairs(props.Items) do
 		local name = type(data) == "string" and data or data.Label
 		local sel = type(data) == "table" and data.Selected or false
-		c.__instance:AddItem(name, sel)
+		addItem(name, sel)
 	end
 
 	uc()
@@ -233,7 +233,7 @@ return function(self, props)
 	local obj = { Type = "Pulldown", __instance = c.__instance }
 
 	function obj.Parent(p) c.Parent = p end
-	function obj:AddItem(name, sel) c.__instance:AddItem(name, sel) end
+	function obj:AddItem(name, sel) addItem(name, sel) end
 
 	return obj
 end
