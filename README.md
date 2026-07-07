@@ -60,11 +60,21 @@ UI.Icons["chevron-up"]    -- "rbxassetid://137296891812002"
 UI.Icons["chevron-left"]  -- "rbxassetid://103603118195781"
 ```
 
-## Demo
+## Demo (No Key System)
 
 ```lua
 loadstring(game:HttpGet(
 	"https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/demo.lua"
+))()
+```
+
+## Key System Loader
+
+Shows a key verification window. On success, loads the main UI.
+
+```lua
+loadstring(game:HttpGet(
+	"https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/loader.lua"
 ))()
 ```
 
