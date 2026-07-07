@@ -1,114 +1,113 @@
 --[[
 	UnAliveUI — Notification Component
 	
-	macOS-style bottom-right notification with swipe-to-dismiss.
-	Smooth entrance/exit animations. Fully configurable API.
+	macOS-style bottom-right notification with original design:
+	- Shadow (4px oversized, 78% black)
+	- Dark canvas (#12141a at 8%)
+	- Blur effect (24px inset)
+	- Icon (38×38, 10px rounded)
+	- Title (SF Pro SemiBold 15px)
+	- Description (SF Pro 15px)
+	- Timestamp
+	- Smooth slide-in animation
+	- 12-second auto-dismiss
 	
 	Usage:
 		local n = UI:New("Notification", {
 			Title = "UnAlive",
 			Description = "Welcome to UnAlive",
 			Icon = "rbxassetid://127922205331150",
-			Duration = 5, -- seconds, 0 = manual dismiss
+			Duration = 12,
 		})
 		n:Parent(gui)
-		
-		-- API
 		n.SetTitle("New Title")
 		n.SetDescription("New description")
-		n.SetIcon("rbxassetid://...")
-		n.SetTimestamp("2m ago")
-		n.Dismiss() -- manually dismiss
+		n.Dismiss()
 --]]
 
 local TS = game:GetService("TweenService")
-local UIS = game:GetService("UserInputService")
 
 return function(self, props)
 	props = props or {}
 	props.Title = props.Title or "Notification"
 	props.Description = props.Description or ""
-	props.Duration = props.Duration or 5
+	props.Duration = props.Duration or 12
 	props.Icon = props.Icon or "rbxassetid://127922205331150"
 
 	local dark = Color3.fromRGB(18, 20, 26); local white = Color3.fromRGB(255, 255, 255)
-	local closed = false; local dragging = false; local dragStart, dragStartPos
-	local targetPos = UDim2.new(1, -12, 1, -12)
+	local blur = _G.__unaliveui_blur
+	if not blur then
+		blur = loadstring(game:HttpGet("https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/core/blur.lua"))()
+	end
 
 	local n = Instance.new("Frame")
 	n.Name = "Notification"; n.Size = UDim2.fromOffset(386, 64)
-	n.Position = UDim2.new(1, 50, 1, -12)
-	n.BackgroundTransparency = 1; n.BorderSizePixel = 0; n.ZIndex = 100; n.ClipsDescendants = true
+	n.AnchorPoint = Vector2.new(1, 1)
+	n.Position = UDim2.new(1, 30, 1, -12)
+	n.BackgroundTransparency = 1; n.BorderSizePixel = 0; n.ZIndex = 999; n.ClipsDescendants = true
 	Instance.new("UICorner", n).CornerRadius = UDim.new(0, 24)
 
-	-- Shadow
-	local shadow = Instance.new("Frame", n); shadow.Name = "Shadow"
-	shadow.Size = UDim2.new(1, 4, 1, 4); shadow.Position = UDim2.fromOffset(-2, -2)
-	shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0); shadow.BackgroundTransparency = 0.78
-	shadow.BorderSizePixel = 0; shadow.ZIndex = -1
-	Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 24)
+	-- Shadow (4px oversized, black 78%)
+	local ns = Instance.new("Frame", n); ns.Name = "Shadow"
+	ns.Size = UDim2.new(1, 4, 1, 4); ns.Position = UDim2.fromOffset(-2, -2)
+	ns.BackgroundColor3 = Color3.fromRGB(0, 0, 0); ns.BackgroundTransparency = 0.78
+	ns.BorderSizePixel = 0; ns.ZIndex = -1
+	Instance.new("UICorner", ns).CornerRadius = UDim.new(0, 24)
 
-	-- Canvas
-	local canvas = Instance.new("Frame", n); canvas.Name = "Canvas"
-	canvas.Size = UDim2.fromScale(1, 1)
-	canvas.BackgroundColor3 = dark; canvas.BackgroundTransparency = 0.08
-	canvas.BorderSizePixel = 0; canvas.ZIndex = 1
-	Instance.new("UICorner", canvas).CornerRadius = UDim.new(0, 24)
+	-- Canvas (dark bg at 8%)
+	local nc = Instance.new("Frame", n); nc.Name = "Canvas"
+	nc.Size = UDim2.fromScale(1, 1)
+	nc.BackgroundColor3 = dark; nc.BackgroundTransparency = 0.08
+	nc.BorderSizePixel = 0; nc.ZIndex = 1
+	Instance.new("UICorner", nc).CornerRadius = UDim.new(0, 24)
 
-	-- Blur
-	local blurPane = Instance.new("Frame", n); blurPane.Name = "BlurPane"
-	blurPane.Size = UDim2.new(1, -22, 1, -22); blurPane.Position = UDim2.fromOffset(11, 11)
-	blurPane.BackgroundTransparency = 1; blurPane.BorderSizePixel = 0; blurPane.ZIndex = 0
-	_G.__unaliveui_blur = _G.__unaliveui_blur or loadstring(game:HttpGet("https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/core/blur.lua"))()
-	if _G.__unaliveui_blur and blurPane then task.spawn(function() _G.__unaliveui_blur(blurPane) end) end
+	-- Blur pane (24px inset at 12,12)
+	local nb = Instance.new("Frame", n); nb.Name = "BlurPane"
+	nb.Size = UDim2.new(1, -24, 1, -24); nb.Position = UDim2.fromOffset(12, 12)
+	nb.BackgroundTransparency = 1; nb.BorderSizePixel = 0; nb.ZIndex = 0
+	if blur then task.spawn(function() blur(nb) end) end
 
-	-- Icon
-	local icon = Instance.new("ImageLabel", canvas)
-	icon.Size = UDim2.fromOffset(38, 38); icon.Position = UDim2.fromOffset(14, 13)
-	icon.BackgroundTransparency = 1; icon.BorderSizePixel = 0
-	icon.Image = props.Icon; icon.ZIndex = 3
-	Instance.new("UICorner", icon).CornerRadius = UDim.new(0, 10)
+	-- Icon (38×38, rounded 10px)
+	local ni = Instance.new("ImageLabel", n); ni.Name = "Icon"
+	ni.Size = UDim2.fromOffset(38, 38); ni.Position = UDim2.fromOffset(14, 13)
+	ni.BackgroundTransparency = 1; ni.BorderSizePixel = 0
+	ni.Image = props.Icon; ni.ZIndex = 3
+	Instance.new("UICorner", ni).CornerRadius = UDim.new(0, 10)
 
 	-- Title
-	local titleLbl = Instance.new("TextLabel", canvas)
-	titleLbl.Size = UDim2.fromOffset(274, 17); titleLbl.Position = UDim2.fromOffset(62, 12)
-	titleLbl.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold)
-	titleLbl.Text = props.Title; titleLbl.TextSize = 15; titleLbl.TextColor3 = white
-	titleLbl.TextXAlignment = Enum.TextXAlignment.Left; titleLbl.TextYAlignment = Enum.TextYAlignment.Top
-	titleLbl.RichText = true; titleLbl.BackgroundTransparency = 1; titleLbl.ZIndex = 3
+	local nt = Instance.new("TextLabel", n); nt.Name = "Title"
+	nt.Size = UDim2.fromOffset(274, 17); nt.Position = UDim2.fromOffset(62, 12)
+	nt.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold)
+	nt.Text = props.Title; nt.TextSize = 15; nt.TextColor3 = white
+	nt.TextXAlignment = Enum.TextXAlignment.Left; nt.TextYAlignment = Enum.TextYAlignment.Top
+	nt.RichText = true; nt.BackgroundTransparency = 1; nt.BorderSizePixel = 0; nt.ZIndex = 3
 
 	-- Description
-	local descLbl = Instance.new("TextLabel", canvas)
-	descLbl.Size = UDim2.fromOffset(274, 18); descLbl.Position = UDim2.fromOffset(62, 30)
-	descLbl.FontFace = Font.new("rbxassetid://12187365364")
-	descLbl.Text = props.Description; descLbl.TextSize = 15
-	descLbl.TextColor3 = Color3.fromRGB(180, 180, 190)
-	descLbl.TextXAlignment = Enum.TextXAlignment.Left; descLbl.TextYAlignment = Enum.TextYAlignment.Top
-	descLbl.RichText = true; descLbl.BackgroundTransparency = 1; descLbl.ZIndex = 3
-	descLbl.Visible = props.Description ~= ""
+	local nd = Instance.new("TextLabel", n); nd.Name = "Description"
+	nd.Size = UDim2.fromOffset(274, 18); nd.Position = UDim2.fromOffset(62, 30)
+	nd.FontFace = Font.new("rbxassetid://12187365364")
+	nd.Text = props.Description; nd.TextSize = 15
+	nd.TextColor3 = Color3.fromRGB(180, 180, 190)
+	nd.TextXAlignment = Enum.TextXAlignment.Left; nd.TextYAlignment = Enum.TextYAlignment.Top
+	nd.RichText = true; nd.BackgroundTransparency = 1; nd.BorderSizePixel = 0; nd.ZIndex = 3
+	nd.Visible = props.Description ~= ""
 
 	-- Timestamp
-	local timeLbl = Instance.new("TextLabel", canvas)
-	timeLbl.Size = UDim2.fromOffset(26, 17); timeLbl.Position = UDim2.fromOffset(346, 12)
-	timeLbl.FontFace = Font.new("rbxassetid://12187365364")
-	timeLbl.Text = "now"; timeLbl.TextSize = 13
-	timeLbl.TextColor3 = Color3.fromRGB(140, 140, 150)
-	timeLbl.TextXAlignment = Enum.TextXAlignment.Right; timeLbl.TextYAlignment = Enum.TextYAlignment.Top
-	timeLbl.BackgroundTransparency = 1; timeLbl.ZIndex = 3
+	local nx = Instance.new("TextLabel", n); nx.Name = "Timestamp"
+	nx.Size = UDim2.fromOffset(26, 17); nx.Position = UDim2.fromOffset(346, 12)
+	nx.FontFace = Font.new("rbxassetid://12187365364")
+	nx.Text = "now"; nx.TextSize = 13
+	nx.TextColor3 = Color3.fromRGB(140, 140, 150)
+	nx.TextXAlignment = Enum.TextXAlignment.Right; nx.TextYAlignment = Enum.TextYAlignment.Top
+	nx.BackgroundTransparency = 1; nx.BorderSizePixel = 0; nx.ZIndex = 3
 
-	-- Animate in
+	-- Animate in from right
 	TS:Create(n, TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
-		Position = targetPos
+		Position = UDim2.new(1, -12, 1, -12)
 	}):Play()
 
 	-- Auto-dismiss
-	if props.Duration and props.Duration > 0 then
-		task.delay(props.Duration, function()
-			if not closed then dismiss() end
-		end)
-	end
-
-	-- Dismiss function
+	local closed = false
 	local function dismiss()
 		if closed then return end; closed = true
 		if props.Closed then task.spawn(props.Closed) end
@@ -118,45 +117,16 @@ return function(self, props)
 		task.delay(0.4, function() if n.Parent then n:Destroy() end end)
 	end
 
-	-- Swipe to dismiss
-	canvas.InputBegan:Connect(function(i, gp)
-		if gp or closed then return end
-		if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-			dragging = true; dragStart = i.Position; dragStartPos = n.Position
-		end
-	end)
-
-	UIS.InputChanged:Connect(function(i)
-		if not dragging then return end
-		if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then
-			local delta = i.Position.X - dragStart.X
-			if delta > 0 then
-				n.Position = UDim2.new(dragStartPos.X.Scale, dragStartPos.X.Offset + delta, dragStartPos.Y.Scale, dragStartPos.Y.Offset)
-			end
-		end
-	end)
-
-	UIS.InputEnded:Connect(function(i)
-		if not dragging then return end
-		if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-			dragging = false
-			local currentX = n.Position.X.Offset
-			if currentX > 100 then
-				dismiss()
-			else
-				TS:Create(n, TweenInfo.new(0.3, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
-					Position = targetPos
-				}):Play()
-			end
-		end
-	end)
+	if props.Duration and props.Duration > 0 then
+		task.delay(props.Duration, function() if not closed then dismiss() end end)
+	end
 
 	local obj = { Type = "Notification", __instance = n }
 	function obj:Parent(p) n.Parent = p end
-	obj.SetTitle = function(t) titleLbl.Text = t end
-	obj.SetDescription = function(d) descLbl.Text = d; descLbl.Visible = d ~= "" end
-	obj.SetIcon = function(id) icon.Image = id end
-	obj.SetTimestamp = function(t) timeLbl.Text = t end
+	obj.SetTitle = function(t) nt.Text = t end
+	obj.SetDescription = function(d) nd.Text = d; nd.Visible = d ~= "" end
+	obj.SetIcon = function(id) ni.Image = id end
+	obj.SetTimestamp = function(t) nx.Text = t end
 	obj.Dismiss = dismiss
 	return obj
 end
