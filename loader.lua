@@ -71,7 +71,7 @@ local CONFIG = {
 	Window = {
 		Width = 540, Height = 400, CornerRadius = 16, BorderThickness = 1,
 		BgColor = Color3.fromRGB(12, 12, 14), BorderColor = Color3.fromRGB(34, 34, 40),
-		Shadow = { Enabled = true, Image = "rbxassetid://6015897843", Transparency = 0.65, Offset = 40 },
+		Shadow = { Enabled = true, Transparency = 0.55, Offset = 6 },
 	},
 	TitleBar = {
 		Height = 34, BgColor = Color3.fromRGB(16, 16, 19), LineColor = Color3.fromRGB(36, 36, 42),
