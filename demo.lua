@@ -50,6 +50,14 @@ Instance.new("UICorner", card).CornerRadius = UDim.new(0, 16)
 local cardStroke = Instance.new("UIStroke", card)
 cardStroke.Color = Color3.fromRGB(38, 38, 46); cardStroke.Thickness = 1; cardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
+-- Card shadow
+local cardShadow = Instance.new("ImageLabel", card); cardShadow.Name = "Shadow"
+cardShadow.Size = UDim2.new(1, 30, 1, 30); cardShadow.Position = UDim2.new(0, -15, 0, -15)
+cardShadow.BackgroundTransparency = 1; cardShadow.Image = "rbxassetid://6015897843"
+cardShadow.ImageColor3 = Color3.fromRGB(0, 0, 0); cardShadow.ImageTransparency = 0.7
+cardShadow.ScaleType = Enum.ScaleType.Slice; cardShadow.SliceCenter = Rect.new(49, 49, 50, 50)
+cardShadow.ZIndex = 4
+
 -- Search bar (top-right)
 local sf = Instance.new("Frame", card); sf.Name = "SearchField"
 sf.Size = UDim2.fromOffset(122, 26); sf.Position = UDim2.fromOffset(365, 10)
