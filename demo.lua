@@ -190,6 +190,7 @@ UserInputService.InputEnded:Connect(function(i)
         if drag then drag = false; Tween(uiScale, {Scale = 1}, DR.ScaleDur, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
             if window:FindFirstChild("Shadow") and window.Shadow:IsA("ImageLabel") then
                 Tween(window.Shadow, {ImageTransparency = W.Shadow.Transparency}, DR.ScaleDur) end
+        end
     end
 end)
 
