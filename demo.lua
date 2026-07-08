@@ -1,13 +1,9 @@
 --[[
 	UnAliveUI — Main Window UI
-	
-	Dark Alert theme window with title bar, search bar, EditMenu, and content pages.
 --]]
 
 local TS = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
-local dark = Color3.fromRGB(18, 20, 26)
-local white = Color3.fromRGB(255, 255, 255)
 local normalColor = Color3.fromRGB(245, 245, 245)
 local selectedColor = Color3.fromRGB(255, 66, 84)
 
@@ -15,30 +11,32 @@ local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui
 local existing = playerGui:FindFirstChild("UnAliveUI")
 if existing then existing:Destroy() end
 
--- ScreenGui
 local gui = Instance.new("ScreenGui")
 gui.Name = "UnAliveUI"; gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling; gui.IgnoreGuiInset = true
 gui.DisplayOrder = 999; gui.Parent = playerGui
 
--- Window
+-- Window (540×400)
 local win = Instance.new("Frame", gui); win.Name = "Window"
 win.Size = UDim2.fromOffset(540, 400)
 win.Position = UDim2.new(0.5, -270, 0.5, -200)
-win.BackgroundColor3 = dark; win.BackgroundTransparency = 0.08
-win.BorderSizePixel = 0; win.ZIndex = 2; win.ClipsDescendants = true
+win.BackgroundColor3 = Color3.fromRGB(12, 12, 14); win.BorderSizePixel = 0
+win.ClipsDescendants = true; win.ZIndex = 2
 Instance.new("UICorner", win).CornerRadius = UDim.new(0, 16)
 local winStroke = Instance.new("UIStroke", win)
-winStroke.Color = white; winStroke.Transparency = 0.88; winStroke.Thickness = 1
+winStroke.Color = Color3.fromRGB(34, 34, 40); winStroke.Thickness = 1; winStroke.Transparency = 0
 
--- Window shadow
+-- UIScale
+Instance.new("UIScale", win)
+
+-- Shadow (3px larger, behind window)
 local winShadow = Instance.new("Frame", win); winShadow.Name = "Shadow"
 winShadow.Size = UDim2.new(1, 6, 1, 6); winShadow.Position = UDim2.new(0, -3, 0, -3)
 winShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0); winShadow.BackgroundTransparency = 0.65
 winShadow.BorderSizePixel = 0; winShadow.ZIndex = 1
 Instance.new("UICorner", winShadow).CornerRadius = UDim.new(0, 16)
 
--- Title Bar
+-- TitleBar (34px)
 local tb = Instance.new("Frame", win); tb.Name = "TitleBar"
 tb.Size = UDim2.new(1, 0, 0, 34); tb.BackgroundColor3 = Color3.fromRGB(16, 16, 19)
 tb.BorderSizePixel = 0; tb.ZIndex = 10
@@ -57,45 +55,38 @@ titleLbl.TextColor3 = Color3.fromRGB(190, 190, 198)
 titleLbl.TextXAlignment = Enum.TextXAlignment.Left; titleLbl.TextYAlignment = Enum.TextYAlignment.Center
 titleLbl.TextTruncate = Enum.TextTruncate.AtEnd; titleLbl.ZIndex = 11
 
--- Close dot
-local closeDot = Instance.new("TextButton", tb)
-closeDot.Size = UDim2.fromOffset(10, 10); closeDot.AnchorPoint = Vector2.new(0.5, 0.5)
-closeDot.Position = UDim2.new(1, -21, 0.5, 0); closeDot.BackgroundColor3 = Color3.fromRGB(255, 95, 87)
-closeDot.BorderSizePixel = 0; closeDot.Text = ""; closeDot.AutoButtonColor = false; closeDot.ZIndex = 15
-Instance.new("UICorner", closeDot).CornerRadius = UDim.new(1, 0)
-Instance.new("UIStroke", closeDot).Color = Color3.fromRGB(0, 0, 0); closeDot.UIStroke.Transparency = 0.6; closeDot.UIStroke.Thickness = 0.5
-closeDot.MouseButton1Click:Connect(function() gui:Destroy() end)
+local function makeDot(color, x)
+	local d = Instance.new("TextButton", tb)
+	d.Size = UDim2.fromOffset(10, 10); d.AnchorPoint = Vector2.new(0.5, 0.5)
+	d.Position = UDim2.new(1, -x, 0.5, 0); d.BackgroundColor3 = color
+	d.BorderSizePixel = 0; d.Text = ""; d.AutoButtonColor = false; d.ZIndex = 15
+	Instance.new("UICorner", d).CornerRadius = UDim.new(1, 0)
+	local ds = Instance.new("UIStroke", d); ds.Color = Color3.fromRGB(0, 0, 0); ds.Transparency = 0.6; ds.Thickness = 0.5
+	return d
+end
 
--- Minimize dot
-local minDot = Instance.new("TextButton", tb)
-minDot.Size = UDim2.fromOffset(10, 10); minDot.AnchorPoint = Vector2.new(0.5, 0.5)
-minDot.Position = UDim2.new(1, -39, 0.5, 0); minDot.BackgroundColor3 = Color3.fromRGB(255, 189, 46)
-minDot.BorderSizePixel = 0; minDot.Text = ""; minDot.AutoButtonColor = false; minDot.ZIndex = 15
-Instance.new("UICorner", minDot).CornerRadius = UDim.new(1, 0)
-Instance.new("UIStroke", minDot).Color = Color3.fromRGB(0, 0, 0); minDot.UIStroke.Transparency = 0.6; minDot.UIStroke.Thickness = 0.5
+makeDot(Color3.fromRGB(255, 95, 87), 21).MouseButton1Click:Connect(function() gui:Destroy() end)
+
+local minDot = makeDot(Color3.fromRGB(255, 189, 46), 39)
 local minimized = false
 minDot.MouseButton1Click:Connect(function()
 	minimized = not minimized
-	if minimized then
-		TS:Create(win, TweenInfo.new(0.35, Enum.EasingStyle.Quad), { Size = UDim2.fromOffset(540, 34) }):Play()
-	else
-		TS:Create(win, TweenInfo.new(0.35, Enum.EasingStyle.Quad), { Size = UDim2.fromOffset(540, 400) }):Play()
-	end
+	TS:Create(win, TweenInfo.new(0.35, Enum.EasingStyle.Quad), { Size = minimized and UDim2.fromOffset(540, 34) or UDim2.fromOffset(540, 400) }):Play()
 end)
 
 -- Drag
-local dragging, dragStart, dragStartPos = false, nil, nil
+local dragging, dSt, dPos = false, nil, nil
 tb.InputBegan:Connect(function(i, gp)
 	if gp then return end
 	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-		dragging = true; dragStart = i.Position; dragStartPos = win.Position
+		dragging = true; dSt = i.Position; dPos = win.Position
 	end
 end)
 UIS.InputChanged:Connect(function(i)
 	if not dragging then return end
 	if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then
-		local delta = i.Position - dragStart
-		win.Position = UDim2.new(dragStartPos.X.Scale, dragStartPos.X.Offset + delta.X, dragStartPos.Y.Scale, dragStartPos.Y.Offset + delta.Y)
+		local delta = i.Position - dSt
+		win.Position = UDim2.new(dPos.X.Scale, dPos.X.Offset + delta.X, dPos.Y.Scale, dPos.Y.Offset + delta.Y)
 	end
 end)
 UIS.InputEnded:Connect(function(i)
@@ -104,13 +95,13 @@ UIS.InputEnded:Connect(function(i)
 	end
 end)
 
--- Card
+-- Card (496×330)
 local card = Instance.new("Frame", win); card.Name = "Card"
 card.Size = UDim2.fromOffset(496, 330); card.Position = UDim2.fromOffset(22, 52)
 card.BackgroundColor3 = Color3.fromRGB(20, 20, 24); card.BorderSizePixel = 0; card.ZIndex = 5
 Instance.new("UICorner", card).CornerRadius = UDim.new(0, 16)
 local cardStroke = Instance.new("UIStroke", card)
-cardStroke.Color = Color3.fromRGB(38, 38, 46); cardStroke.Thickness = 1; cardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+cardStroke.Color = Color3.fromRGB(38, 38, 46); cardStroke.Thickness = 1; cardStroke.Transparency = 0
 
 -- Card shadow
 local cardShadow = Instance.new("ImageLabel", card); cardShadow.Name = "Shadow"
@@ -120,14 +111,16 @@ cardShadow.ImageColor3 = Color3.fromRGB(0, 0, 0); cardShadow.ImageTransparency =
 cardShadow.ScaleType = Enum.ScaleType.Slice; cardShadow.SliceCenter = Rect.new(49, 49, 50, 50)
 cardShadow.ZIndex = 4
 
+-- === MAIN UI COMPONENTS (inside Card) ===
+
 -- Search bar (top-right)
 local sf = Instance.new("Frame", card); sf.Name = "SearchField"
 sf.Size = UDim2.fromOffset(122, 26); sf.Position = UDim2.fromOffset(365, 10)
-sf.BackgroundColor3 = dark; sf.BackgroundTransparency = 0.08
+sf.BackgroundColor3 = Color3.fromRGB(18, 20, 26); sf.BackgroundTransparency = 0.08
 sf.BorderSizePixel = 0; sf.ZIndex = 20; sf.ClipsDescendants = true
 Instance.new("UICorner", sf).CornerRadius = UDim.new(0, 13)
 local sfBorder = Instance.new("UIStroke", sf)
-sfBorder.Color = white; sfBorder.Transparency = 0.92; sfBorder.Thickness = 0.5
+sfBorder.Color = Color3.fromRGB(255, 255, 255); sfBorder.Transparency = 0.92; sfBorder.Thickness = 0.5
 local sfIcon = Instance.new("ImageLabel", sf); sfIcon.Size = UDim2.fromOffset(16,16); sfIcon.Position = UDim2.fromOffset(8,5)
 sfIcon.BackgroundTransparency = 1; sfIcon.Image = "rbxassetid://117204739779559"; sfIcon.ImageColor3 = Color3.fromRGB(200,200,200); sfIcon.ScaleType = Enum.ScaleType.Fit; sfIcon.ZIndex = 21
 local sfPH = Instance.new("TextLabel", sf); sfPH.Name = "Placeholder"
@@ -145,7 +138,7 @@ sfClear.ImageColor3 = Color3.fromRGB(138,138,138); sfClear.ScaleType = Enum.Scal
 local function syncPH() sfPH.Visible = (sfBox.Text == ""); sfClear.Visible = (sfBox.Text ~= "") end
 sfBox:GetPropertyChangedSignal("Text"):Connect(syncPH)
 sfBox.Focused:Connect(function() sfPH.Visible = false; TS:Create(sfBorder, TweenInfo.new(0.2), {Color = Color3.fromRGB(200,200,200), Transparency = 0.5}):Play() end)
-sfBox.FocusLost:Connect(function() syncPH(); TS:Create(sfBorder, TweenInfo.new(0.2), {Color = white, Transparency = 0.92}):Play() end)
+sfBox.FocusLost:Connect(function() syncPH(); TS:Create(sfBorder, TweenInfo.new(0.2), {Color = Color3.fromRGB(255,255,255), Transparency = 0.92}):Play() end)
 sfClear.MouseButton1Click:Connect(function() sfBox.Text = ""; sfBox:CaptureFocus() end)
 syncPH()
 
@@ -165,8 +158,7 @@ local pageData = {
 
 for pi, pd in ipairs(pageData) do
 	local pg = Instance.new("Frame", pages); pg.Name = "Page"..pi
-	pg.Size = UDim2.fromScale(1,1); pg.BackgroundTransparency = 1; pg.BorderSizePixel = 0; pg.ZIndex = 20
-	pg.Visible = pi == 1
+	pg.Size = UDim2.fromScale(1,1); pg.BackgroundTransparency = 1; pg.BorderSizePixel = 0; pg.ZIndex = 20; pg.Visible = pi == 1
 	local lbl = Instance.new("TextLabel", pg); lbl.Size = UDim2.fromOffset(200,30); lbl.Position = UDim2.fromOffset(20,40)
 	lbl.BackgroundTransparency = 1; lbl.FontFace = Font.new("rbxassetid://12187365364"); lbl.Text = pd.title; lbl.TextSize = 24
 	lbl.TextColor3 = Color3.fromRGB(255,255,255); lbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -175,21 +167,20 @@ for pi, pd in ipairs(pageData) do
 	desc.TextColor3 = Color3.fromRGB(180,180,190); desc.TextXAlignment = Enum.TextXAlignment.Left
 end
 
--- EditMenu (bottom of card)
+-- EditMenu (bottom)
 local em = Instance.new("Frame", card); em.Name = "EditMenu"
 em.Size = UDim2.fromOffset(488, 44); em.Position = UDim2.fromOffset(4, 276); em.ZIndex = 20; em.BackgroundTransparency = 1
 local emShadow = Instance.new("Frame", em); emShadow.Size = UDim2.new(1,4,1,4); emShadow.Position = UDim2.fromOffset(-2,-2)
 emShadow.BackgroundColor3 = Color3.fromRGB(0,0,0); emShadow.BackgroundTransparency = 0.82; emShadow.BorderSizePixel = 0; emShadow.ZIndex = -1
 Instance.new("UICorner", emShadow).CornerRadius = UDim.new(0, 34)
-local emGlass = Instance.new("Frame", em); emGlass.Size = UDim2.fromScale(1,1); emGlass.BackgroundColor3 = Color3.fromRGB(12, 14, 18)
-emGlass.BackgroundTransparency = 0; emGlass.BorderSizePixel = 0; emGlass.ZIndex = 20
+local emGlass = Instance.new("Frame", em); emGlass.Size = UDim2.fromScale(1,1)
+emGlass.BackgroundColor3 = Color3.fromRGB(12, 14, 18); emGlass.BackgroundTransparency = 0; emGlass.BorderSizePixel = 0; emGlass.ZIndex = 20
 Instance.new("UICorner", emGlass).CornerRadius = UDim.new(0, 34)
-local emStroke = Instance.new("UIStroke", emGlass); emStroke.Color = white; emStroke.Transparency = 0.88; emStroke.Thickness = 1
+local emStroke = Instance.new("UIStroke", emGlass); emStroke.Color = Color3.fromRGB(255,255,255); emStroke.Transparency = 0.88; emStroke.Thickness = 1
 local emContent = Instance.new("Frame", em); emContent.Size = UDim2.fromScale(1,1); emContent.BackgroundTransparency = 1; emContent.BorderSizePixel = 0; emContent.ZIndex = 22
 local emLayout = Instance.new("UIListLayout", emContent); emLayout.FillDirection = Enum.FillDirection.Horizontal; emLayout.VerticalAlignment = Enum.VerticalAlignment.Center; emLayout.Padding = UDim.new(0, 0)
 Instance.new("UIPadding", emContent).PaddingLeft = UDim.new(0, 20); Instance.new("UIPadding", emContent).PaddingRight = UDim.new(0, 4)
 
--- EditMenu items
 local items = {{"Farm",50,34,false},{"Shop",68,35,true},{"Steal",67,34,true},{"Spawn",78,45,true},{"Config",77,44,true},{"Settings",88,55,true}}
 local selectedLabel = nil
 
@@ -198,7 +189,7 @@ for ei, ed in ipairs(items) do
 	local a = Instance.new("Frame", emContent); a.Size = UDim2.fromOffset(w,18); a.BackgroundTransparency = 1; a.BorderSizePixel = 0
 	if hasSep then
 		local s = Instance.new("Frame", a); s.Size = UDim2.fromOffset(1,18); s.Position = UDim2.fromOffset(0,0)
-		s.BackgroundColor3 = white; s.BackgroundTransparency = 0.8; s.BorderSizePixel = 0
+		s.BackgroundColor3 = Color3.fromRGB(255,255,255); s.BackgroundTransparency = 0.8; s.BorderSizePixel = 0
 	end
 	local lb = Instance.new("TextLabel", a)
 	lb.Size = UDim2.fromOffset(tw,18); lb.Position = UDim2.fromOffset(hasSep and 17 or 0,0)
@@ -210,10 +201,8 @@ for ei, ed in ipairs(items) do
 	hb.BackgroundTransparency = 1; hb.BorderSizePixel = 0; hb.Text = ""; hb.ZIndex = 22; hb.AutoButtonColor = false
 	hb.MouseButton1Click:Connect(function()
 		if selectedLabel == lb then return end
-		if selectedLabel then
-			TS:Create(selectedLabel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextColor3 = normalColor, TextTransparency = 0.3 }):Play()
-			task.delay(0.15, function() if selectedLabel then TS:Create(selectedLabel, TweenInfo.new(0.1), { TextTransparency = 0 }):Play() end end)
-		end
+		if selectedLabel then TS:Create(selectedLabel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextColor3 = normalColor, TextTransparency = 0.3 }):Play()
+			task.delay(0.15, function() if selectedLabel then TS:Create(selectedLabel, TweenInfo.new(0.1), { TextTransparency = 0 }):Play() end end) end
 		lb.TextColor3 = selectedColor; lb.TextTransparency = 0.3
 		TS:Create(lb, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextColor3 = selectedColor, TextTransparency = 0 }):Play()
 		selectedLabel = lb
@@ -222,11 +211,10 @@ for ei, ed in ipairs(items) do
 	end)
 end
 
--- Indicator
 local ind = Instance.new("Frame", emContent); ind.Size = UDim2.fromOffset(36,36)
 ind.BackgroundColor3 = Color3.fromRGB(3,3,3); ind.BackgroundTransparency = 0
 Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
 local ii = Instance.new("ImageLabel", ind); ii.Size = UDim2.fromOffset(24,24); ii.Position = UDim2.fromOffset(6,6)
-ii.BackgroundTransparency = 1; ii.Image = "rbxassetid://103603118195781"; ii.ImageColor3 = white; ii.ScaleType = Enum.ScaleType.Fit; ii.ZIndex = 22
+ii.BackgroundTransparency = 1; ii.Image = "rbxassetid://103603118195781"; ii.ImageColor3 = Color3.fromRGB(255,255,255); ii.ScaleType = Enum.ScaleType.Fit; ii.ZIndex = 22
 
 print("=== UnAliveUI Main Window ===")
