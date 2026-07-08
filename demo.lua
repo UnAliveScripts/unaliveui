@@ -1,20 +1,23 @@
 --[[
-	UnAliveUI — Main UI
+	UnAliveUI — Main Window UI
 	
-	Main application window with EditMenu, search bar, and content pages.
-	Dark Alert theme. Runs after key system validation.
+	Dark Alert theme window with EditMenu, search bar, and content pages.
+	
+	Usage:
+		loadstring(game:HttpGet(
+			"https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/demo.lua"
+		))()
 --]]
 
 local TS = game:GetService("TweenService")
 local dark = Color3.fromRGB(18, 20, 26)
 local white = Color3.fromRGB(255, 255, 255)
-local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+local normalColor = Color3.fromRGB(245, 245, 245)
+local selectedColor = Color3.fromRGB(255, 66, 84)
 
--- Clean up
-for _, name in pairs({"UnAliveUI", "UnAliveKeySystem"}) do
-	local e = playerGui:FindFirstChild(name)
-	if e then e:Destroy() end
-end
+local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+local existing = playerGui:FindFirstChild("UnAliveUI")
+if existing then existing:Destroy() end
 
 -- ScreenGui
 local gui = Instance.new("ScreenGui")
@@ -27,10 +30,17 @@ local win = Instance.new("Frame", gui); win.Name = "Window"
 win.Size = UDim2.fromOffset(540, 400)
 win.Position = UDim2.new(0.5, -270, 0.5, -200)
 win.BackgroundColor3 = dark; win.BackgroundTransparency = 0.08
-win.BorderSizePixel = 0; win.ZIndex = 2
+win.BorderSizePixel = 0; win.ZIndex = 2; win.ClipsDescendants = false
 Instance.new("UICorner", win).CornerRadius = UDim.new(0, 16)
 local winStroke = Instance.new("UIStroke", win)
 winStroke.Color = white; winStroke.Transparency = 0.88; winStroke.Thickness = 1
+
+-- Window shadow
+local winShadow = Instance.new("Frame", win); winShadow.Name = "Shadow"
+winShadow.Size = UDim2.new(1, 6, 1, 6); winShadow.Position = UDim2.new(0, -3, 0, -3)
+winShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0); winShadow.BackgroundTransparency = 0.65
+winShadow.BorderSizePixel = 0; winShadow.ZIndex = 1
+Instance.new("UICorner", winShadow).CornerRadius = UDim.new(0, 16)
 
 -- Card
 local card = Instance.new("Frame", win); card.Name = "Card"
@@ -46,17 +56,22 @@ sf.Size = UDim2.fromOffset(122, 26); sf.Position = UDim2.fromOffset(365, 10)
 sf.BackgroundColor3 = dark; sf.BackgroundTransparency = 0.08
 sf.BorderSizePixel = 0; sf.ZIndex = 20; sf.ClipsDescendants = true
 Instance.new("UICorner", sf).CornerRadius = UDim.new(0, 13)
-local sfBorder = Instance.new("UIStroke", sf); sfBorder.Color = white; sfBorder.Transparency = 0.92; sfBorder.Thickness = 0.5
+local sfBorder = Instance.new("UIStroke", sf)
+sfBorder.Color = white; sfBorder.Transparency = 0.92; sfBorder.Thickness = 0.5
 local sfIcon = Instance.new("ImageLabel", sf); sfIcon.Size = UDim2.fromOffset(16,16); sfIcon.Position = UDim2.fromOffset(8,5)
 sfIcon.BackgroundTransparency = 1; sfIcon.Image = "rbxassetid://117204739779559"; sfIcon.ImageColor3 = Color3.fromRGB(200,200,200); sfIcon.ScaleType = Enum.ScaleType.Fit; sfIcon.ZIndex = 21
-local sfPH = Instance.new("TextLabel", sf); sfPH.Size = UDim2.fromOffset(74,16); sfPH.Position = UDim2.fromOffset(26,5)
+local sfPH = Instance.new("TextLabel", sf); sfPH.Name = "Placeholder"
+sfPH.Size = UDim2.fromOffset(74,16); sfPH.Position = UDim2.fromOffset(26,5)
 sfPH.BackgroundTransparency = 1; sfPH.FontFace = Font.new("rbxassetid://12187365364"); sfPH.Text = "Search"; sfPH.TextSize = 13
 sfPH.TextColor3 = Color3.fromRGB(245,245,245); sfPH.TextXAlignment = Enum.TextXAlignment.Left; sfPH.TextYAlignment = Enum.TextYAlignment.Center; sfPH.ZIndex = 21
-local sfBox = Instance.new("TextBox", sf); sfBox.Size = UDim2.fromOffset(74,16); sfBox.Position = UDim2.fromOffset(26,5)
+local sfBox = Instance.new("TextBox", sf); sfBox.Name = "Input"
+sfBox.Size = UDim2.fromOffset(74,16); sfBox.Position = UDim2.fromOffset(26,5)
 sfBox.BackgroundTransparency = 1; sfBox.FontFace = Font.new("rbxassetid://12187365364"); sfBox.Text = ""; sfBox.TextSize = 13
 sfBox.TextColor3 = Color3.fromRGB(245,245,245); sfBox.TextXAlignment = Enum.TextXAlignment.Left; sfBox.TextYAlignment = Enum.TextYAlignment.Center; sfBox.ClearTextOnFocus = false; sfBox.ZIndex = 22
-local sfClear = Instance.new("ImageButton", sf); sfClear.Size = UDim2.fromOffset(16,16); sfClear.Position = UDim2.fromOffset(100,5)
-sfClear.BackgroundTransparency = 1; sfClear.AutoButtonColor = false; sfClear.Image = "rbxassetid://78668603799563"; sfClear.ImageColor3 = Color3.fromRGB(138,138,138); sfClear.ScaleType = Enum.ScaleType.Fit; sfClear.ZIndex = 22; sfClear.Visible = false
+local sfClear = Instance.new("ImageButton", sf); sfClear.Name = "Clear"
+sfClear.Size = UDim2.fromOffset(16,16); sfClear.Position = UDim2.fromOffset(100,5)
+sfClear.BackgroundTransparency = 1; sfClear.AutoButtonColor = false; sfClear.Image = "rbxassetid://78668603799563"
+sfClear.ImageColor3 = Color3.fromRGB(138,138,138); sfClear.ScaleType = Enum.ScaleType.Fit; sfClear.ZIndex = 22; sfClear.Visible = false
 local function syncPH() sfPH.Visible = (sfBox.Text == ""); sfClear.Visible = (sfBox.Text ~= "") end
 sfBox:GetPropertyChangedSignal("Text"):Connect(syncPH)
 sfBox.Focused:Connect(function() sfPH.Visible = false; TS:Create(sfBorder, TweenInfo.new(0.2), {Color = Color3.fromRGB(200,200,200), Transparency = 0.5}):Play() end)
@@ -90,7 +105,7 @@ for pi, pd in ipairs(pageData) do
 	desc.TextColor3 = Color3.fromRGB(180,180,190); desc.TextXAlignment = Enum.TextXAlignment.Left
 end
 
--- EditMenu (bottom of card)
+-- EditMenu
 local em = Instance.new("Frame", card); em.Name = "EditMenu"
 em.Size = UDim2.fromOffset(488, 44); em.Position = UDim2.fromOffset(4, 276); em.ZIndex = 20; em.BackgroundTransparency = 1
 local emShadow = Instance.new("Frame", em); emShadow.Size = UDim2.new(1,4,1,4); emShadow.Position = UDim2.fromOffset(-2,-2)
@@ -104,9 +119,9 @@ local emContent = Instance.new("Frame", em); emContent.Size = UDim2.fromScale(1,
 local emLayout = Instance.new("UIListLayout", emContent); emLayout.FillDirection = Enum.FillDirection.Horizontal; emLayout.VerticalAlignment = Enum.VerticalAlignment.Center; emLayout.Padding = UDim.new(0, 0)
 Instance.new("UIPadding", emContent).PaddingLeft = UDim.new(0, 20); Instance.new("UIPadding", emContent).PaddingRight = UDim.new(0, 4)
 
+-- EditMenu items with animated selection
 local items = {{"Farm",50,34,false},{"Shop",68,35,true},{"Steal",67,34,true},{"Spawn",78,45,true},{"Config",77,44,true},{"Settings",88,55,true}}
 local selectedLabel = nil
-local normalColor = Color3.fromRGB(245,245,245); local selectedColor = Color3.fromRGB(255,66,84)
 
 for ei, ed in ipairs(items) do
 	local text, w, tw, hasSep = table.unpack(ed)
@@ -125,15 +140,29 @@ for ei, ed in ipairs(items) do
 	hb.BackgroundTransparency = 1; hb.BorderSizePixel = 0; hb.Text = ""; hb.ZIndex = 22; hb.AutoButtonColor = false
 	hb.MouseButton1Click:Connect(function()
 		if selectedLabel == lb then return end
-		if selectedLabel then TS:Create(selectedLabel, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { TextColor3 = normalColor }):Play() end
-		TS:Create(lb, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { TextColor3 = selectedColor }):Play()
+		-- Fade out old
+		if selectedLabel then
+			TS:Create(selectedLabel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				TextColor3 = normalColor, TextTransparency = 0.3,
+			}):Play()
+			task.delay(0.15, function()
+				if selectedLabel then TS:Create(selectedLabel, TweenInfo.new(0.1), { TextTransparency = 0 }):Play() end
+			end)
+		end
+		-- Fade in new
+		lb.TextColor3 = selectedColor; lb.TextTransparency = 0.3
+		TS:Create(lb, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			TextColor3 = selectedColor, TextTransparency = 0,
+		}):Play()
 		selectedLabel = lb
+		-- Switch page
 		for _, p in pairs(pages:GetChildren()) do if p:IsA("Frame") then p.Visible = false end end
 		local target = pages:FindFirstChild("Page"..ei)
 		if target then target.Visible = true end
 	end)
 end
 
+-- Indicator
 local ind = Instance.new("Frame", emContent); ind.Size = UDim2.fromOffset(36,36)
 ind.BackgroundColor3 = Color3.fromRGB(3,3,3); ind.BackgroundTransparency = 0
 Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
