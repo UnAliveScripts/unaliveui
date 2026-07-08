@@ -10,7 +10,11 @@ return function(self, props)
 	local selectedLabel = nil; local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local body = C("Frame")({ Name = "EditMenu", BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.fromOffset(488, 44),
 		C("Frame")({ Name = "FillShadow", Size = UDim2.new(1, 4, 1, 4), Position = UDim2.fromOffset(-2, -2), BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.82, BorderSizePixel = 0, ZIndex = -1, C("UICorner")({ CornerRadius = UDim.new(0, 34) }) }),
-		C("Frame")({ Name = "Glass", Size = UDim2.fromScale(1, 1), BackgroundColor3 = dark, BackgroundTransparency = 0.08, BorderSizePixel = 0, ZIndex = 1, C("UICorner")({ CornerRadius = UDim.new(0, 34) }), C("UIStroke")({ Color = white, Transparency = 0.88, Thickness = 1 }) }),
+		C("Frame")({
+			Name = "Glass",
+			Size = UDim2.fromScale(1, 1),
+			BackgroundColor3 = Color3.fromRGB(12, 14, 18),
+			BackgroundTransparency = 0, BorderSizePixel = 0, ZIndex = 1, C("UICorner")({ CornerRadius = UDim.new(0, 34) }), C("UIStroke")({ Color = white, Transparency = 0.88, Thickness = 1 }) }),
 		C("Frame")({ Name = "BlurPane", Size = UDim2.new(1, -34, 1, -34), Position = UDim2.fromOffset(17, 17), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 0 }),
 		C("Frame")({ Name = "Content", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 3,
 			C("UIListLayout")({ FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 0) }),
@@ -29,6 +33,6 @@ return function(self, props)
 		hitbox.MouseButton1Click:Connect(function() if selectedLabel == label then return end; if selectedLabel then TS:Create(selectedLabel, tweenInfo, { TextColor3 = normalColor }):Play() end; TS:Create(label, tweenInfo, { TextColor3 = selectedColor }):Play(); selectedLabel = label; if props.OnSelected then props.OnSelected(item, i) end end)
 	end
 	local ind = Instance.new("Frame"); ind.Size = UDim2.fromOffset(36, 36); ind.BackgroundColor3 = Color3.fromRGB(12, 12, 14); ind.BackgroundTransparency = 0; ind.Parent = content; Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
-	local ii = Instance.new("ImageLabel"); ii.Size = UDim2.fromOffset(18, 18); ii.Position = UDim2.fromOffset(9, 9); ii.BackgroundTransparency = 1; ii.Image = "rbxassetid://103603118195781"; ii.ImageColor3 = white; ii.ScaleType = Enum.ScaleType.Fit; ii.ZIndex = 3; ii.Parent = ind
+	local ii = Instance.new("ImageLabel"); ii.Size = UDim2.fromOffset(24, 24); ii.Position = UDim2.fromOffset(6, 6); ii.BackgroundTransparency = 1; ii.Image = "rbxassetid://103603118195781"; ii.ImageColor3 = white; ii.ScaleType = Enum.ScaleType.Fit; ii.ZIndex = 3; ii.Parent = ind
 	local obj = { Type = "EditMenu", __instance = body.__instance }; function obj.Parent(p) body.Parent = p end; return obj
 end
