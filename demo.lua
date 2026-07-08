@@ -18,7 +18,7 @@ local CONFIG = {
     Window = {
         Width = 540, Height = 400, CornerRadius = 16, BorderThickness = 1,
         BgColor = Color3.fromRGB(12, 12, 14), BorderColor = Color3.fromRGB(34, 34, 40),
-        Shadow = {Enabled = true, Image = "rbxassetid://6015897843", Transparency = 0.65, Offset = 40},
+        Shadow = {Enabled = true, Transparency = 0.65},
     },
     TitleBar = {
         Height = 34, BgColor = Color3.fromRGB(16, 16, 19), LineColor = Color3.fromRGB(36, 36, 42),
@@ -60,7 +60,7 @@ local window = Instance.new("Frame")
 window.Name = "Window"; window.Size = UDim2.new(0, WIN_W, 0, WIN_H)
 window.Position = UDim2.new(0.5, -WIN_W/2, 0.5, -WIN_H/2)
 window.BackgroundColor3 = W.BgColor; window.BorderSizePixel = 0
-window.ClipsDescendants = true; window.ZIndex = 2; window.Parent = gui
+window.ClipsDescendants = false; window.ZIndex = 2; window.Parent = gui
 Instance.new("UICorner", window).CornerRadius = UDim.new(0, W.CornerRadius)
 local winStroke = Instance.new("UIStroke", window)
 winStroke.Color = W.BorderColor; winStroke.Thickness = W.BorderThickness
@@ -68,13 +68,12 @@ winStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 local uiScale = Instance.new("UIScale"); uiScale.Parent = window
 
 if W.Shadow.Enabled then
-    local s = Instance.new("ImageLabel")
-    s.Name = "Shadow"; s.Size = UDim2.new(1, W.Shadow.Offset, 1, W.Shadow.Offset)
-    s.Position = UDim2.new(0, -W.Shadow.Offset/2, 0, -W.Shadow.Offset/2)
-    s.BackgroundTransparency = 1; s.Image = W.Shadow.Image
-    s.ImageColor3 = Color3.fromRGB(0,0,0); s.ImageTransparency = W.Shadow.Transparency
-    s.ScaleType = Enum.ScaleType.Slice; s.SliceCenter = Rect.new(49,49,50,50)
-    s.ZIndex = 1; s.Parent = window
+    local s = Instance.new("Frame")
+    s.Name = "Shadow"; s.Size = UDim2.new(1, 6, 1, 6)
+    s.Position = UDim2.new(0, -3, 0, -3)
+    s.BackgroundColor3 = Color3.fromRGB(0,0,0); s.BackgroundTransparency = 0.65
+    s.BorderSizePixel = 0; s.ZIndex = 1; s.Parent = window
+    Instance.new("UICorner", s).CornerRadius = UDim.new(0, W.CornerRadius)
 end
 
 -- TitleBar
@@ -161,6 +160,10 @@ local targetPos = window.Position; local dragConn
 local function startDrag(input)
     drag = true; dSt = input.Position; dPos = window.Position; targetPos = dPos
     Tween(uiScale, {Scale = DR.ScaleDown}, DR.ScaleDur)
+    if window:FindFirstChild("Shadow") and window.Shadow:IsA("ImageLabel") then
+        local darker = math.max(0, W.Shadow.Transparency - DR.ShadowDarken)
+        Tween(window.Shadow, {ImageTransparency = darker}, DR.ScaleDur)
+    end
     if dragConn then dragConn:Disconnect() end
     dragConn = RunService.Heartbeat:Connect(function()
         if not drag then dragConn:Disconnect(); dragConn = nil; return end
@@ -184,7 +187,9 @@ UserInputService.InputChanged:Connect(function(i)
 end)
 UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        if drag then drag = false; Tween(uiScale, {Scale = 1}, DR.ScaleDur, Enum.EasingStyle.Back, Enum.EasingDirection.Out) end
+        if drag then drag = false; Tween(uiScale, {Scale = 1}, DR.ScaleDur, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+            if window:FindFirstChild("Shadow") and window.Shadow:IsA("ImageLabel") then
+                Tween(window.Shadow, {ImageTransparency = W.Shadow.Transparency}, DR.ScaleDur) end
     end
 end)
 
