@@ -28,7 +28,7 @@ return function(self, props)
 		local hitbox = Instance.new("TextButton"); hitbox.Size = UDim2.fromScale(1, 1); hitbox.BackgroundTransparency = 1; hitbox.BorderSizePixel = 0; hitbox.Text = ""; hitbox.ZIndex = 10; hitbox.AutoButtonColor = false; hitbox.Parent = a
 		hitbox.MouseButton1Click:Connect(function() if selectedLabel == label then return end; if selectedLabel then TS:Create(selectedLabel, tweenInfo, { TextColor3 = normalColor }):Play() end; TS:Create(label, tweenInfo, { TextColor3 = selectedColor }):Play(); selectedLabel = label; if props.OnSelected then props.OnSelected(item, i) end end)
 	end
-	local ind = Instance.new("Frame"); ind.Size = UDim2.fromOffset(36, 36); ind.BackgroundColor3 = dark; ind.BackgroundTransparency = 0.08; ind.Parent = content; Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
+	local ind = Instance.new("Frame"); ind.Size = UDim2.fromOffset(36, 36); ind.BackgroundColor3 = Color3.fromRGB(12, 12, 14); ind.BackgroundTransparency = 0; ind.Parent = content; Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
 	local ii = Instance.new("ImageLabel"); ii.Size = UDim2.fromOffset(18, 18); ii.Position = UDim2.fromOffset(9, 9); ii.BackgroundTransparency = 1; ii.Image = "rbxassetid://103603118195781"; ii.ImageColor3 = white; ii.ScaleType = Enum.ScaleType.Fit; ii.ZIndex = 3; ii.Parent = ind
 	local obj = { Type = "EditMenu", __instance = body.__instance }; function obj.Parent(p) body.Parent = p end; return obj
 end
