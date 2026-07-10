@@ -45,6 +45,7 @@ local componentMap = {
 	Slider = "Slider.lua", Label = "Label.lua",
 	TextField = "TextField.lua", Icon = "Icon.lua",
 	Page = "Page.lua", Row = "Row.lua",
+	LiquidGlassButton = "LiquidGlassButton.lua",
 }
 
 for name, file in pairs(componentMap) do
