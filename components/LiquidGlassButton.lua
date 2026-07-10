@@ -20,6 +20,9 @@ return function(self, props)
 	local btn = Instance.new("Frame")
 	btn.Name = "LiquidGlassBtn"; btn.Size = UDim2.fromOffset(60, 28)
 	btn.BackgroundTransparency = 1; btn.ZIndex = 30
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 14)
+	Instance.new("UIStroke", btn).Color = Color3.fromRGB(38, 38, 46)
+	btn.UIStroke.Thickness = 1; btn.UIStroke.Transparency = 0
 
 	local scale = Instance.new("UIScale", btn); scale.Scale = 1
 
