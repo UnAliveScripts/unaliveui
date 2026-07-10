@@ -1,88 +1,87 @@
 --[[
-	UnAliveUI — SearchField Component
+	UnAliveUI — TextField Component
 	
-	Fully functional search bar with pill shape, magnifier icon,
-	placeholder, text input, and clear button. Dark Alert theme.
+	Mini text field with dark Alert theme, animated border focus,
+	blue cursor, and placeholder. Length is configurable.
 	
 	Usage:
-		local sf = UI:New("TextField", { Placeholder = "Search" })
-		sf:Parent(gui)
-		sf.SetValue("text")
-		sf.GetValue() -- returns text
-		sf.SetPlaceholder("new placeholder")
+		local tf = UI.TextField({ Placeholder = "Value", Width = 120 })
+		tf:Parent(gui)
+		
+		tf:SetValue("text")
+		tf:GetValue() -- returns text
+		tf:SetPlaceholder("new")
 --]]
 
 local TS = game:GetService("TweenService")
 
 return function(self, props)
-	props = props or {}; props.Placeholder = props.Placeholder or "Search"
-	local dark = Color3.fromRGB(18, 20, 26); local white = Color3.fromRGB(255, 255, 255)
+	props = props or {}
+	local phText = props.Placeholder or "Value"
+	local width = props.Width or 120
+	local dark = Color3.fromRGB(18, 20, 26)
+	local white = Color3.fromRGB(255, 255, 255)
 
-	local sf = Instance.new("Frame")
-	sf.Name = "SearchField"; sf.Size = UDim2.fromOffset(122, 26)
-	sf.BackgroundColor3 = dark; sf.BackgroundTransparency = 0.08
-	sf.BorderSizePixel = 0; sf.ZIndex = 50; sf.ClipsDescendants = true
-	Instance.new("UICorner", sf).CornerRadius = UDim.new(0, 13)
+	local tf = Instance.new("Frame")
+	tf.Name = "TextField"; tf.Size = UDim2.fromOffset(width, 16)
+	tf.BackgroundTransparency = 1; tf.ZIndex = 30
 
-	-- Border
-	local border = Instance.new("UIStroke", sf)
-	border.Color = white; border.Transparency = 0.92; border.Thickness = 0.5
+	local bg = Instance.new("Frame", tf)
+	bg.Size = UDim2.fromScale(1, 1); bg.BorderSizePixel = 0
+	bg.BackgroundColor3 = dark; bg.BackgroundTransparency = 0.08; bg.ZIndex = 30
+	Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 4)
 
-	-- Search icon
-	local icon = Instance.new("ImageLabel", sf)
-	icon.Size = UDim2.fromOffset(16, 16); icon.Position = UDim2.fromOffset(8, 5)
-	icon.BackgroundTransparency = 1; icon.BorderSizePixel = 0; icon.ZIndex = 2
-	icon.Image = "rbxassetid://117204739779559"
-	icon.ImageColor3 = Color3.fromRGB(200, 200, 200); icon.ScaleType = Enum.ScaleType.Fit
+	local border = Instance.new("UIStroke", bg)
+	border.Color = white; border.Thickness = 0.5; border.Transparency = 0.92
 
-	-- Placeholder
-	local ph = Instance.new("TextLabel", sf)
-	ph.Size = UDim2.fromOffset(74, 16); ph.Position = UDim2.fromOffset(26, 5)
-	ph.BackgroundTransparency = 1; ph.BorderSizePixel = 0; ph.ZIndex = 2
-	ph.FontFace = Font.new("rbxassetid://12187365364")
-	ph.Text = props.Placeholder; ph.TextSize = 13
-	ph.TextColor3 = Color3.fromRGB(245, 245, 245)
-	ph.TextXAlignment = Enum.TextXAlignment.Left; ph.TextYAlignment = Enum.TextYAlignment.Center
+	local ph = Instance.new("TextLabel", tf)
+	ph.Size = UDim2.fromOffset(width - 8, 16); ph.Position = UDim2.fromOffset(6, 0)
+	ph.BackgroundTransparency = 1; ph.FontFace = Font.new("rbxassetid://12187365364")
+	ph.Text = phText; ph.TextSize = 10; ph.TextColor3 = Color3.fromRGB(180, 180, 180)
+	ph.TextXAlignment = Enum.TextXAlignment.Left; ph.TextYAlignment = Enum.TextYAlignment.Center; ph.ZIndex = 31
 
-	-- Text input
-	local box = Instance.new("TextBox", sf)
-	box.Size = UDim2.fromOffset(74, 16); box.Position = UDim2.fromOffset(26, 5)
-	box.BackgroundTransparency = 1; box.BorderSizePixel = 0; box.ZIndex = 3
-	box.FontFace = Font.new("rbxassetid://12187365364")
-	box.Text = ""; box.TextSize = 13
-	box.TextColor3 = Color3.fromRGB(245, 245, 245)
-	box.TextXAlignment = Enum.TextXAlignment.Left; box.TextYAlignment = Enum.TextYAlignment.Center
-	box.ClearTextOnFocus = false
+	local input = Instance.new("TextBox", tf)
+	input.Size = UDim2.fromOffset(width - 8, 16); input.Position = UDim2.fromOffset(6, 0)
+	input.BackgroundTransparency = 1; input.BorderSizePixel = 0; input.ZIndex = 32
+	input.FontFace = Font.new("rbxassetid://12187365364"); input.Text = ""; input.TextSize = 10
+	input.TextColor3 = Color3.fromRGB(180, 180, 180)
+	input.TextXAlignment = Enum.TextXAlignment.Left; input.TextYAlignment = Enum.TextYAlignment.Center
+	input.ClearTextOnFocus = false
 
-	-- Clear button
-	local clear = Instance.new("ImageButton", sf)
-	clear.Size = UDim2.fromOffset(16, 16); clear.Position = UDim2.fromOffset(100, 5)
-	clear.BackgroundTransparency = 1; clear.BorderSizePixel = 0; clear.AutoButtonColor = false; clear.ZIndex = 4
-	clear.Image = "rbxassetid://78668603799563"
-	clear.ImageColor3 = Color3.fromRGB(138, 138, 138); clear.ScaleType = Enum.ScaleType.Fit
-	clear.Visible = false
+	local cursor = Instance.new("Frame", tf)
+	cursor.Size = UDim2.fromOffset(2, 14); cursor.Position = UDim2.fromOffset(6, 1)
+	cursor.BackgroundColor3 = Color3.fromRGB(0, 145, 255); cursor.BorderSizePixel = 0; cursor.ZIndex = 32
+	cursor.Visible = false
+	Instance.new("UICorner", cursor).CornerRadius = UDim.new(0, 1)
 
-	local function syncPH() ph.Visible = (box.Text == ""); clear.Visible = (box.Text ~= "") end
-	box:GetPropertyChangedSignal("Text"):Connect(syncPH)
+	local function updateCursor()
+		local cx = math.min(6 + input.TextBounds.X, width - 4)
+		cursor.Position = UDim2.fromOffset(cx, 1)
+	end
 
-	box.Focused:Connect(function()
+	input:GetPropertyChangedSignal("Text"):Connect(function()
+		ph.Visible = (input.Text == ""); updateCursor()
+	end)
+
+	input.Focused:Connect(function()
 		ph.Visible = false
-		TS:Create(border, TweenInfo.new(0.2), { Color = Color3.fromRGB(200, 200, 200), Transparency = 0.5 }):Play()
+		TS:Create(border, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Color = Color3.fromRGB(200, 200, 200), Transparency = 0.5, Thickness = 1 }):Play()
+		cursor.Visible = true; updateCursor()
+		task.spawn(function()
+			local b = false
+			while cursor.Visible do task.wait(0.5); b = not b; cursor.BackgroundTransparency = b and 0 or 1 end
+		end)
 	end)
-	box.FocusLost:Connect(function()
-		syncPH()
-		TS:Create(border, TweenInfo.new(0.2), { Color = white, Transparency = 0.92 }):Play()
-		if props.ValueChanged then task.spawn(props.ValueChanged, box.Text) end
+
+	input.FocusLost:Connect(function()
+		TS:Create(border, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Color = white, Transparency = 0.92, Thickness = 0.5 }):Play()
+		cursor.Visible = false; ph.Visible = (input.Text == "")
 	end)
 
-	clear.MouseButton1Click:Connect(function() box.Text = ""; box:CaptureFocus() end)
-
-	syncPH()
-
-	local obj = { Type = "TextField", __instance = sf }
-	function obj:Parent(p) sf.Parent = p end
-	obj.SetValue = function(v) box.Text = v end
-	obj.GetValue = function() return box.Text end
+	local obj = { Type = "TextField", __instance = tf }
+	function obj:Parent(p) tf.Parent = p end
+	obj.SetValue = function(v) input.Text = v end
+	obj.GetValue = function() return input.Text end
 	obj.SetPlaceholder = function(v) ph.Text = v end
 	return obj
 end
