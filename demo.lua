@@ -99,41 +99,58 @@ titleLbl.TextSize = TB.TextSize; titleLbl.TextColor3 = TB.TextColor
 titleLbl.TextXAlignment = Enum.TextXAlignment.Left; titleLbl.TextYAlignment = Enum.TextYAlignment.Center
 titleLbl.TextTruncate = Enum.TextTruncate.AtEnd; titleLbl.ZIndex = 11; titleLbl.Parent = titleBar
 
--- Dots
-if DT.Enabled then
-    local minimized = false; local origSz, origPos
-    local dotActions = {
-        function() gui:Destroy() end,
-        function()
-            if minimized then
-                Tween(window, {Size = origSz, Position = origPos}, MN.AnimDur, MN.Easing[1], MN.Easing[2])
-                minimized = false
-            else
-                origSz = window.Size; origPos = window.Position
-                Tween(window, {Size = UDim2.new(0, WIN_W, 0, MN.CollapsedHeight)}, MN.AnimDur, MN.Easing[1], MN.Easing[2])
-                minimized = true
-            end
-        end,
-    }
-    local dotClrs = {DT.Colors.Close, DT.Colors.Minimize}
-    for i = 1, 2 do
-        local offset = DT.RightOffset + DT.Size/2 + (2-i)*(DT.Size + DT.Spacing)
-        local dot = Instance.new("TextButton")
-        dot.Name = "Dot" .. i; dot.Size = UDim2.new(0, DT.Size, 0, DT.Size)
-        dot.AnchorPoint = Vector2.new(0.5, 0.5)
-        dot.Position = UDim2.new(1, -offset, 0.5, 0)
-        dot.BackgroundColor3 = dotClrs[i]; dot.BorderSizePixel = 0
-        dot.Text = ""; dot.AutoButtonColor = false; dot.ZIndex = 15
-        dot.Parent = titleBar
-        Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
-        local ds = Instance.new("UIStroke", dot)
-        ds.Color = DT.Colors.Stroke; ds.Thickness = 0.5; ds.Transparency = 0.6
-        local base = dotClrs[i]
-        dot.MouseEnter:Connect(function() Tween(dot, {BackgroundColor3 = base:Lerp(Color3.new(1,1,1), 0.22)}, 0.12) end)
-        dot.MouseLeave:Connect(function() Tween(dot, {BackgroundColor3 = base}, 0.12) end)
-        dot.MouseButton1Click:Connect(dotActions[i])
-    end
+-- Traffic light dots with hover-reveal icons
+local dotData = {
+	{Color3.fromRGB(255, 95, 87), "rbxassetid://93520763686656", function() gui:Destroy() end},
+	{Color3.fromRGB(255, 189, 46), "rbxassetid://110147285593118", function()
+		local minimized = window:GetAttribute("Minimized") or false
+		window:SetAttribute("Minimized", not minimized)
+		TweenService:Create(window, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Size = not minimized and UDim2.fromOffset(540, 34) or UDim2.fromOffset(540, 400)
+		}):Play()
+	end},
+	{Color3.fromRGB(39, 200, 64), "rbxassetid://126761302820331", function() print("Zoom") end},
+}
+
+for i, d in ipairs(dotData) do
+	local dot = Instance.new("TextButton", titleBar)
+	dot.Name = "Dot"..i; dot.Size = UDim2.fromOffset(10, 10); dot.AnchorPoint = Vector2.new(0.5, 0.5)
+	dot.Position = UDim2.new(1, -(16 + 6 + (3-i)*(16)), 0.5, 0)
+	dot.BackgroundColor3 = d[1]; dot.BackgroundTransparency = 0.8
+	dot.BorderSizePixel = 0; dot.Text = ""; dot.AutoButtonColor = false; dot.ZIndex = 15
+	Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+	local s = Instance.new("UIStroke", dot); s.Color = Color3.fromRGB(0, 0, 0); s.Transparency = 0.7; s.Thickness = 0.5
+	
+	local icon = Instance.new("ImageLabel", dot)
+	icon.Size = UDim2.fromOffset(8, 8); icon.Position = UDim2.fromOffset(1, 1)
+	icon.BackgroundTransparency = 1; icon.BorderSizePixel = 0; icon.ZIndex = 16
+	icon.Image = d[2]; icon.ImageColor3 = Color3.fromRGB(255, 255, 255); icon.ImageTransparency = 1
+	icon.ScaleType = Enum.ScaleType.Fit
+	
+	dot.MouseEnter:Connect(function()
+		TweenService:Create(dot, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 0 }):Play()
+		TweenService:Create(icon, TweenInfo.new(0.08), { ImageTransparency = 0 }):Play()
+	end)
+	dot.MouseLeave:Connect(function()
+		TweenService:Create(dot, TweenInfo.new(0.15), { BackgroundTransparency = 0.8 }):Play()
+		TweenService:Create(icon, TweenInfo.new(0.15), { ImageTransparency = 1 }):Play()
+	end)
+	dot.MouseButton1Click:Connect(d[3])
 end
+
+-- Show on title hover, hide on leave
+titleBar.MouseEnter:Connect(function()
+	for _, c in pairs(titleBar:GetChildren()) do if c:IsA("TextButton") and c.Name:find("Dot") then
+		TweenService:Create(c, TweenInfo.new(0.15), { BackgroundTransparency = 0.4 }):Play()
+	end end
+end)
+titleBar.MouseLeave:Connect(function()
+	for _, c in pairs(titleBar:GetChildren()) do if c:IsA("TextButton") and c.Name:find("Dot") then
+		TweenService:Create(c, TweenInfo.new(0.25), { BackgroundTransparency = 0.8 }):Play()
+		local icon = c:FindFirstChildOfClass("ImageLabel")
+		if icon then TweenService:Create(icon, TweenInfo.new(0.2), { ImageTransparency = 1 }):Play() end
+	end end
+end)
 
 -- Card
 local card = Instance.new("Frame")
