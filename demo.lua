@@ -145,22 +145,24 @@ for _, d in ipairs(btnData) do
 	table.insert(dotIcons, ic)
 end
 
--- Show all dot icons when hovering title bar, hide on leave with debounce
-local hideId = 0
-titleBar.MouseEnter:Connect(function()
-	hideId = hideId + 1
+-- Show icons on title bar hover, hide on leave
+-- Individual dots re-show as safety net when hovering them
+local function showIcons()
 	for _, ic in ipairs(dotIcons) do ic.Visible = true end
-end)
-titleBar.MouseLeave:Connect(function()
-	local id = hideId + 1
-	hideId = id
-	task.spawn(function()
-		task.wait(0.07)
-		if hideId == id then
-			for _, ic in ipairs(dotIcons) do ic.Visible = false end
-		end
-	end)
-end)
+end
+local function hideIcons()
+	for _, ic in ipairs(dotIcons) do ic.Visible = false end
+end
+
+titleBar.MouseEnter:Connect(showIcons)
+titleBar.MouseLeave:Connect(hideIcons)
+
+-- Dot hover safety nets — re-show icons when directly on a dot
+for _, btn in ipairs(titleBar:GetChildren()) do
+	if btn:IsA("ImageButton") and btn:FindFirstChild("Icon") then
+		btn.MouseEnter:Connect(showIcons)
+	end
+end
 
 -- Card
 local card = Instance.new("Frame")
