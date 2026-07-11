@@ -145,15 +145,20 @@ for _, d in ipairs(btnData) do
 	table.insert(dotIcons, ic)
 end
 
--- Show all dot icons when hovering title bar, hide on leave
-local leaveTimer
+-- Show all dot icons when hovering title bar, hide on leave with debounce
+local hideId = 0
 titleBar.MouseEnter:Connect(function()
-	if leaveTimer then leaveTimer:Cancel() end
+	hideId = hideId + 1
 	for _, ic in ipairs(dotIcons) do ic.Visible = true end
 end)
 titleBar.MouseLeave:Connect(function()
-	leaveTimer = task.delay(0.05, function()
-		for _, ic in ipairs(dotIcons) do ic.Visible = false end
+	local id = hideId + 1
+	hideId = id
+	task.spawn(function()
+		task.wait(0.07)
+		if hideId == id then
+			for _, ic in ipairs(dotIcons) do ic.Visible = false end
+		end
 	end)
 end)
 
