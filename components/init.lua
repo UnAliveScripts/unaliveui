@@ -8,7 +8,7 @@ local names = {
 	"Window", "WindowPill", "EditMenu", "Stepper", "StepperPill",
 	"Pulldown", "TrailingAccessories", "Notification", "Alert",
 	"Button", "Toggle", "Slider", "Label", "TextField", "Icon", "Page", "Row",
-	"LiquidGlassButton", "Card",
+	"LiquidGlassButton", "Card", "SubCard",
 }
 
 local components = {}
