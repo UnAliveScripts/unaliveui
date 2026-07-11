@@ -107,6 +107,7 @@ local btnData = {
 	{Name = "Minimize", Clr = Color3.fromHex("FEBC2E"), Icn = "rbxassetid://118368309445367", Idx = 2},
 }
 
+local dotIcons = {}
 for _, d in ipairs(btnData) do
 	local offset = RIGHT_OFFSET + DOT_SIZE/2 + (2 - d.Idx) * (DOT_SIZE + SPACING)
 	
@@ -141,9 +142,20 @@ for _, d in ipairs(btnData) do
 	ic.Visible = false
 	ic.Parent = btn
 	
-	btn.MouseEnter:Connect(function() ic.Visible = true end)
-	btn.MouseLeave:Connect(function() ic.Visible = false end)
+	table.insert(dotIcons, ic)
 end
+
+-- Show all dot icons when hovering title bar, hide on leave
+local leaveTimer
+titleBar.MouseEnter:Connect(function()
+	if leaveTimer then leaveTimer:Cancel() end
+	for _, ic in ipairs(dotIcons) do ic.Visible = true end
+end)
+titleBar.MouseLeave:Connect(function()
+	leaveTimer = task.delay(0.05, function()
+		for _, ic in ipairs(dotIcons) do ic.Visible = false end
+	end)
+end)
 
 -- Card
 local card = Instance.new("Frame")
