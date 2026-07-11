@@ -1,7 +1,8 @@
 --[[
 	UnAliveUI — Main Window UI
 	
-	Dark Alert theme window with title bar, search bar, EditMenu, and content pages.
+	Dark Alert theme window with title bar, search bar, EditMenu, content pages,
+	Myriad-style WindowPill, traffic light buttons (close/minimize), and Myriad exact minimize.
 --]]
 
 local TweenService = game:GetService("TweenService")
@@ -12,6 +13,8 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 local existing = playerGui:FindFirstChild("UnAliveUI")
 if existing then existing:Destroy() end
+local existingPill = playerGui:FindFirstChild("UnAliveUI_Pill")
+if existingPill then existingPill:Destroy() end
 
 -- Config
 local CONFIG = {
@@ -25,10 +28,6 @@ local CONFIG = {
         Text = "UnAlive", TextColor = Color3.fromRGB(190, 190, 198),
         Font = Enum.Font.Gotham, TextSize = 14, TextLeft = 14,
     },
-    Dots = {
-        Enabled = true, RightOffset = 16, Size = 10, Spacing = 8,
-        Colors = {Close = Color3.fromRGB(255, 95, 87), Minimize = Color3.fromRGB(255, 189, 46), Stroke = Color3.fromRGB(0, 0, 0)},
-    },
     Card = {
         MarginLeft = 22, MarginRight = 22, MarginTop = 18, MarginBottom = 18,
         CornerRadius = 16, BorderThickness = 1,
@@ -38,19 +37,17 @@ local CONFIG = {
     Drag = {
         Smoothness = 0.15, ScaleDown = 0.97, ScaleDur = 0.15, ShadowDarken = 0.15,
     },
-    Minimize = {
-        CollapsedHeight = 36, AnimDur = 0.35, Easing = {Enum.EasingStyle.Quad, Enum.EasingDirection.Out},
-    },
 }
 
-local W = CONFIG.Window; local TB = CONFIG.TitleBar; local DT = CONFIG.Dots
-local CD = CONFIG.Card; local DR = CONFIG.Drag; local MN = CONFIG.Minimize
+local W = CONFIG.Window; local TB = CONFIG.TitleBar
+local CD = CONFIG.Card; local DR = CONFIG.Drag
 local WIN_W = W.Width; local WIN_H = W.Height; local TB_H = TB.Height
 
 local function Tween(obj, props, dur, sty, dir)
     TweenService:Create(obj, TweenInfo.new(dur or 0.25, sty or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out), props):Play()
 end
 
+-- Main ScreenGui
 local gui = Instance.new("ScreenGui")
 gui.Name = "UnAliveUI"; gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling; gui.IgnoreGuiInset = true
@@ -58,14 +55,15 @@ gui.DisplayOrder = 999; gui.Parent = playerGui
 
 local window = Instance.new("Frame")
 window.Name = "Window"; window.Size = UDim2.new(0, WIN_W, 0, WIN_H)
-window.Position = UDim2.new(0.5, -WIN_W/2, 0.5, -WIN_H/2)
+window.AnchorPoint = Vector2.new(0.5, 0.5)
+window.Position = UDim2.fromScale(0.5, 0.5)
 window.BackgroundColor3 = W.BgColor; window.BorderSizePixel = 0
 window.ClipsDescendants = false; window.ZIndex = 2; window.Parent = gui
 Instance.new("UICorner", window).CornerRadius = UDim.new(0, W.CornerRadius)
 local winStroke = Instance.new("UIStroke", window)
 winStroke.Color = W.BorderColor; winStroke.Thickness = W.BorderThickness
 winStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-local uiScale = Instance.new("UIScale"); uiScale.Parent = window
+local guiScale = Instance.new("UIScale"); guiScale.Name = "UIScale"; guiScale.Parent = gui
 
 if W.Shadow.Enabled then
     local s = Instance.new("Frame")
@@ -99,40 +97,52 @@ titleLbl.TextSize = TB.TextSize; titleLbl.TextColor3 = TB.TextColor
 titleLbl.TextXAlignment = Enum.TextXAlignment.Left; titleLbl.TextYAlignment = Enum.TextYAlignment.Center
 titleLbl.TextTruncate = Enum.TextTruncate.AtEnd; titleLbl.ZIndex = 11; titleLbl.Parent = titleBar
 
--- Dots
-if DT.Enabled then
-    local minimized = false; local origSz, origPos
-    local dotActions = {
-        function() gui:Destroy() end,
-        function()
-            if minimized then
-                Tween(window, {Size = origSz, Position = origPos}, MN.AnimDur, MN.Easing[1], MN.Easing[2])
-                minimized = false
-            else
-                origSz = window.Size; origPos = window.Position
-                Tween(window, {Size = UDim2.new(0, WIN_W, 0, MN.CollapsedHeight)}, MN.AnimDur, MN.Easing[1], MN.Easing[2])
-                minimized = true
-            end
-        end,
-    }
-    local dotClrs = {DT.Colors.Close, DT.Colors.Minimize}
-    for i = 1, 2 do
-        local offset = DT.RightOffset + DT.Size/2 + (2-i)*(DT.Size + DT.Spacing)
-        local dot = Instance.new("TextButton")
-        dot.Name = "Dot" .. i; dot.Size = UDim2.new(0, DT.Size, 0, DT.Size)
-        dot.AnchorPoint = Vector2.new(0.5, 0.5)
-        dot.Position = UDim2.new(1, -offset, 0.5, 0)
-        dot.BackgroundColor3 = dotClrs[i]; dot.BorderSizePixel = 0
-        dot.Text = ""; dot.AutoButtonColor = false; dot.ZIndex = 15
-        dot.Parent = titleBar
-        Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
-        local ds = Instance.new("UIStroke", dot)
-        ds.Color = DT.Colors.Stroke; ds.Thickness = 0.5; ds.Transparency = 0.6
-        local base = dotClrs[i]
-        dot.MouseEnter:Connect(function() Tween(dot, {BackgroundColor3 = base:Lerp(Color3.new(1,1,1), 0.22)}, 0.12) end)
-        dot.MouseLeave:Connect(function() Tween(dot, {BackgroundColor3 = base}, 0.12) end)
-        dot.MouseButton1Click:Connect(dotActions[i])
-    end
+-- Myriad-style traffic light buttons (close + minimize)
+local RIGHT_OFFSET = 16
+local DOT_SIZE = 12
+local SPACING = 8
+
+local btnData = {
+	{Name = "Exit", Clr = Color3.fromHex("FF5F57"), Icn = "rbxassetid://94781753558308", Idx = 1},
+	{Name = "Minimize", Clr = Color3.fromHex("FEBC2E"), Icn = "rbxassetid://118368309445367", Idx = 2},
+}
+
+for _, d in ipairs(btnData) do
+	local offset = RIGHT_OFFSET + DOT_SIZE/2 + (2 - d.Idx) * (DOT_SIZE + SPACING)
+	
+	local btn = Instance.new("ImageButton")
+	btn.Name = d.Name
+	btn.AnchorPoint = Vector2.new(0.5, 0.5)
+	btn.Position = UDim2.new(1, -offset, 0.5, 0)
+	btn.AutoButtonColor = false
+	btn.BackgroundTransparency = 1
+	btn.BorderSizePixel = 0
+	btn.Image = "rbxassetid://132228700346004"
+	btn.ImageColor3 = d.Clr
+	btn.ImageTransparency = 0
+	btn.Size = UDim2.fromOffset(DOT_SIZE, DOT_SIZE)
+	btn.ZIndex = 15
+	btn.Parent = titleBar
+	
+	local stk = Instance.new("ImageLabel")
+	stk.Name = "Stroke"
+	stk.Parent = btn
+	
+	local ic = Instance.new("ImageLabel")
+	ic.Name = "Icon"
+	ic.AnchorPoint = Vector2.new(0.5, 0.5)
+	ic.BackgroundTransparency = 1
+	ic.BorderSizePixel = 0
+	ic.Image = d.Icn
+	ic.ImageColor3 = Color3.fromRGB(0, 0, 0)
+	ic.ImageTransparency = 0.50
+	ic.Position = UDim2.fromScale(0.5, 0.5)
+	ic.Size = UDim2.fromScale(1, 1)
+	ic.Visible = false
+	ic.Parent = btn
+	
+	btn.MouseEnter:Connect(function() ic.Visible = true end)
+	btn.MouseLeave:Connect(function() ic.Visible = false end)
 end
 
 -- Card
@@ -159,7 +169,7 @@ local drag, dSt, dPos = false, nil, nil
 local targetPos = window.Position; local dragConn
 local function startDrag(input)
     drag = true; dSt = input.Position; dPos = window.Position; targetPos = dPos
-    Tween(uiScale, {Scale = DR.ScaleDown}, DR.ScaleDur)
+    Tween(guiScale, {Scale = DR.ScaleDown}, DR.ScaleDur)
     if window:FindFirstChild("Shadow") and window.Shadow:IsA("ImageLabel") then
         local darker = math.max(0, W.Shadow.Transparency - DR.ShadowDarken)
         Tween(window.Shadow, {ImageTransparency = darker}, DR.ScaleDur)
@@ -187,7 +197,7 @@ UserInputService.InputChanged:Connect(function(i)
 end)
 UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        if drag then drag = false; Tween(uiScale, {Scale = 1}, DR.ScaleDur, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+        if drag then drag = false; Tween(guiScale, {Scale = 1}, DR.ScaleDur, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
             if window:FindFirstChild("Shadow") and window.Shadow:IsA("ImageLabel") then
                 Tween(window.Shadow, {ImageTransparency = W.Shadow.Transparency}, DR.ScaleDur) end
         end
@@ -279,5 +289,61 @@ local ind = Instance.new("Frame", emContent); ind.Size = UDim2.fromOffset(36,36)
 Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
 local ii = Instance.new("ImageLabel", ind); ii.Size = UDim2.fromOffset(24,24); ii.Position = UDim2.fromOffset(6,6)
 ii.BackgroundTransparency = 1; ii.Image = "rbxassetid://103603118195781"; ii.ImageColor3 = white; ii.ScaleType = Enum.ScaleType.Fit; ii.ZIndex = 22
+
+-- WindowPill (separate ScreenGui, stays visible when minimized)
+local pillGui = Instance.new("ScreenGui")
+pillGui.Name = "UnAliveUI_Pill"
+pillGui.ResetOnSpawn = false
+pillGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+pillGui.DisplayOrder = 200
+pillGui.IgnoreGuiInset = true
+pillGui.Parent = playerGui
+
+local pill = Instance.new("ImageButton")
+pill.Name = "WindowPill"
+pill.AnchorPoint = Vector2.new(0.5, 0)
+pill.AutoButtonColor = false
+pill.BackgroundTransparency = 1
+pill.BorderSizePixel = 0
+pill.Image = "rbxassetid://93520763686656"
+pill.ImageTransparency = 0.5
+pill.Position = UDim2.new(0.5, 0, 0, 10)
+pill.Size = UDim2.fromOffset(180, 5)
+pill.ZIndex = 999
+pill.Parent = pillGui
+Instance.new("UICorner", pill).CornerRadius = UDim.new(1, 0)
+
+-- Minimize (Myriad exact)
+local mined = false
+local function toggleMinimize()
+	mined = not mined
+	local tY = mined and window.AbsoluteSize.Y * 2 or 0
+	TweenService:Create(window, TweenInfo.new(0.25, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0.5, tY)}):Play()
+	TweenService:Create(guiScale, TweenInfo.new(0.25, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {Scale = mined and 0 or 1}):Play()
+end
+
+-- WindowPill hover glow + click
+local ct
+pill.MouseEnter:Connect(function()
+	if ct then ct:Cancel() end
+	ct = TweenService:Create(pill, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0.15})
+	ct:Play()
+end)
+pill.MouseLeave:Connect(function()
+	if ct then ct:Cancel() end
+	ct = TweenService:Create(pill, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0.5})
+	ct:Play()
+end)
+pill.MouseButton1Click:Connect(toggleMinimize)
+
+-- Wire traffic light buttons
+local exitBtn = titleBar:FindFirstChild("Exit")
+if exitBtn then
+	exitBtn.MouseButton1Click:Connect(function() gui:Destroy(); pillGui:Destroy() end)
+end
+local minBtn = titleBar:FindFirstChild("Minimize")
+if minBtn then
+	minBtn.MouseButton1Click:Connect(toggleMinimize)
+end
 
 print("=== UnAliveUI Main Window ===")
