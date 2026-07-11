@@ -136,34 +136,19 @@ for _, d in ipairs(btnData) do
 	ic.BorderSizePixel = 0
 	ic.Image = d.Icn
 	ic.ImageColor3 = Color3.fromRGB(0, 0, 0)
-	ic.ImageTransparency = 1
+	ic.ImageTransparency = 0.50
 	ic.Position = UDim2.fromScale(0.5, 0.5)
 	ic.Size = UDim2.fromScale(1, 1)
+	ic.Visible = false
 	ic.Parent = btn
+	
+	btn.MouseEnter:Connect(function() ic.Visible = true end)
+	btn.MouseLeave:Connect(function() ic.Visible = false end)
 	
 	table.insert(dotIcons, ic)
 end
 
--- Show icons when cursor enters title bar area; hide when it leaves
--- Uses a transparent overlay button for reliable hover detection
-local hoverZone = Instance.new("TextButton")
-hoverZone.Name = "HoverZone"
-hoverZone.Size = UDim2.new(1, 0, 1, 0)
-hoverZone.BackgroundTransparency = 1
-hoverZone.BorderSizePixel = 0
-hoverZone.Text = ""
-hoverZone.ZIndex = 1
-hoverZone.Parent = titleBar
 
-local function showIcons()
-	for _, ic in ipairs(dotIcons) do ic.ImageTransparency = 0.50 end
-end
-local function hideIcons()
-	for _, ic in ipairs(dotIcons) do ic.ImageTransparency = 1 end
-end
-
-hoverZone.MouseEnter:Connect(showIcons)
-hoverZone.MouseLeave:Connect(hideIcons)
 
 -- Card
 local card = Instance.new("Frame")
