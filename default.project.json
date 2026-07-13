@@ -1,0 +1,13 @@
+{
+  "name": "unaliveui",
+  "tree": {
+    "$className": "DataModel",
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src"
+        }
+      }
+    }
+  }
+}

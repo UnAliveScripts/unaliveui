@@ -1,0 +1,17 @@
+return {
+	Minus = "rbxassetid://110147285593118",
+	Plus = "rbxassetid://126761302820331",
+	ChevronUp = "rbxassetid://137296891812002",
+	ChevronDown = "rbxassetid://84215348315149",
+	Info = "rbxassetid://134900376381669",
+	ChevronRight = "rbxassetid://103603118195781",
+	Logo = "rbxassetid://127922205331150",
+	XMark = "rbxassetid://93520763686656",
+	Close = "rbxassetid://94781753558308",
+	Minimize = "rbxassetid://118368309445367",
+	Zoom = "rbxassetid://114376524082699",
+	Search = "rbxassetid://117204739779559",
+	Clear = "rbxassetid://78668603799563",
+	Key = "rbxassetid://7733964640",
+	Link = "rbxassetid://7733978093",
+}
