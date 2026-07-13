@@ -1,41 +1,53 @@
 # Importing the Library
 
-You can import UnAliveUI directly into your Roblox game using `loadstring` and `game:HttpGet`.
+## Over HTTP
 
-## Basic Import
+!!! note
+    This will only work if the environment you are in supports `loadstring`.
 
-```luau
-local UnAlive = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/src/init.luau"
-))()
-```
+!!! warning
+    If you are always importing from the latest release you could be subject to deprecation and other changes.
 
-## Creating an Application
+This method will download the library dynamically using `loadstring` & `HttpGet`.
 
-Once imported, create a window to start building your UI:
+=== "Latest"
+    ```luau
+    local UnAlive = loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/UnAliveScripts/unaliveui/main/src/init.luau"
+    ))()
+    ```
 
-```luau
-local window = UnAlive:New("Window", {
-    Title = "My App",
-    Size = Vector2.new(540, 400),
-})
-```
+=== "Cached loading"
+    !!! warning
+        `writefile`, `readfile`, and `makefolder` (or equivalent filesystem functions) must be supported in your environment for this method to work.
 
-## Using Components
+    ```luau
+    local function importCached(owner, repo, branch, file)
+        local url = ("https://raw.githubusercontent.com/%s/%s/%s/%s"):format(owner, repo, branch, file)
 
-Components can be created through the `UnAlive` object:
+        local cacheFolder = ".cache"
+        if not isfolder(cacheFolder) then
+            makefolder(cacheFolder)
+        end
 
-```luau
-local toggle = UnAlive:New("Toggle", {
-    Text = "Enable Feature",
-    Value = true,
-})
-```
+        local cacheFile = file:gsub("[^%w%-_%.]", "-")
+        local cachePath = ("%s/%s-%s"):format(cacheFolder, branch, cacheFile)
 
-Or directly:
+        if not isfile(cachePath) then
+            writefile(cachePath, game:HttpGetAsync(url))
+        end
 
-```luau
-local label = UnAlive.Label({
-    Text = "Hello, World!",
-})
-```
+        return loadstring(readfile(cachePath), file)()
+    end
+
+    local UnAlive = importCached("UnAliveScripts", "unaliveui", "main", "src/init.luau")
+    ```
+
+## Local Build
+
+1. Download a valid release from: [UnAlive Releases](https://github.com/UnAliveScripts/unaliveui/releases)
+2. Place the `luau` module into your project (e.g., under `packages/`).
+
+## Building From Source
+
+Proceed to [Building From Source](./building-from-source.md)

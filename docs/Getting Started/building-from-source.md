@@ -1,7 +1,5 @@
 # Building From Source
 
-To build UnAlive from source:
-
 ## Prerequisites
 
 - [Rojo](https://rojo.space/) for Roblox project syncing
@@ -32,4 +30,6 @@ For development, use Rojo's serve mode:
 rojo serve
 ```
 
-Then connect via the Roblox Studio plugin.
+Then connect via the Roblox Studio plugin to sync changes in real time.
+
+The source is located in the `src/` directory. After making changes, rebuild the model file.
