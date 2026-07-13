@@ -1,40 +1,65 @@
-# Standalone
+# The Standalone API
 
-Every component in UnAlive can be used standalone without a parent window.
+The Standalone API lets you create individual UnAlive components without a full [Window](./app.md). This gives you access to the component primitives without the overhead of a window.
 
-## Usage
+## Summary
 
-Components accept a `Parent` property to place them in any GUI container:
+### Properties
+
+| Property | Type               | Description                                                       |
+| -------- | ------------------ | ----------------------------------------------------------------- |
+| Parent   | `#!luau Instance?` | Default parent for components created on this context.            |
+
+## Types
 
 ```luau
-local toggle = UnAlive:New("Toggle", {
-    Text = "Standalone Toggle",
-    Value = false,
-    Parent = someFrame,
-})
+type ComponentProperties = {
+    Theme: Theme?,
+    Parent: Instance?,
+}
+
+type ComponentContext = ComponentProperties & Components
 ```
 
-## Return Values
-
-Each component returns a table with:
-
-| Field    | Type       | Description                         |
-| -------- | ---------- | ----------------------------------- |
-| `Type`   | `string`   | The component type name.            |
-| `Instance`| `Instance` | The root Roblox instance.           |
-| `Parent` | `function` | Method to reparent the component.   |
-
-## Example
+### Function Signature
 
 ```luau
--- Create components without a Window
-local card = UnAlive:New("Card", {
-    Size = UDim2.fromOffset(300, 200),
-    Parent = playerGui,
+function(self, properties: ComponentProperties?): Component
+```
+
+## Examples
+
+### Creating standalone components
+
+```luau
+-- Create a toggle standalone without a window
+local toggle = UnAlive:New("Toggle", {
+    Text = "Standalone Toggle",
+    Value = true,
+    Parent = someFrame,
+    ValueChanged = function(self, value: boolean)
+        print("Value changed:", value)
+    end,
 })
 
-local label = UnAlive:New("Label", {
-    Text = "Standalone component",
+print(toggle.Type) --> "Toggle"
+```
+
+### Shared parent
+
+```luau
+-- Both components are automatically parented to someFrame
+local card = UnAlive:New("Card", {
+    Size = UDim2.fromOffset(300, 200),
+    Parent = someFrame,
+})
+
+local toggle = UnAlive:New("Toggle", {
+    Text = "Inside Card",
+    Value = false,
     Parent = card.Instance,
 })
 ```
+
+!!! note
+    You can still override `Parent` for each component individually.
