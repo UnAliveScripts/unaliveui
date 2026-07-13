@@ -1,0 +1,110 @@
+site_name: UnAlive Developer Documentation
+repo_name: UnAliveScripts/unaliveui
+repo_url: https://github.com/UnAliveScripts/unaliveui
+edit_uri: edit/main/docs/
+extra_css:
+  - assets/styles/extra.css
+
+nav:
+  - Welcome: index.md
+  - Getting Started:
+    - Interface Guidelines: Getting Started/interface-guidelines.md
+    - Importing the Library: Getting Started/importing-the-library.md
+    - Building From Source: Getting Started/building-from-source.md
+    - Example: Getting Started/example.md
+    - The API:
+      - Overview: Getting Started/The API/index.md
+      - App: Getting Started/The API/app.md
+      - Standalone: Getting Started/The API/standalone.md
+      - Themes: Getting Started/The API/themes.md
+      - Accents: Getting Started/The API/accents.md
+  - Components:
+    - Overview: Components/index.md
+    - Window: Components/Window.md
+    - Card: Components/Card.md
+    - SubCard: Components/SubCard.md
+    - Page: Components/Page.md
+    - Row: Components/Row.md
+    - Label: Components/Label.md
+    - Icon: Components/Icon.md
+    - Button: Components/Button.md
+    - Toggle: Components/Toggle.md
+    - Stepper: Components/Stepper.md
+    - Slider: Components/Slider.md
+    - TextField: Components/TextField.md
+    - Notification: Components/Notification.md
+    - EditMenu: Components/EditMenu.md
+    - WindowPill: Components/WindowPill.md
+  - Creating Components:
+    - Introduction: Custom Components/introduction.md
+    - Creating a Component: Custom Components/creating-a-component.md
+    - Internal Modules: Custom Components/internal-modules.md
+  - Creating Themes:
+    - Introduction: Creating Themes & Accents/introduction.md
+    - Themes: Creating Themes & Accents/themes.md
+    - Accents: Creating Themes & Accents/accents.md
+
+theme:
+  name: material
+  favicon: assets/favicon.png
+  logo: assets/logo.svg
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - content.action.edit
+    - content.action.view
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+  font:
+    text: Roboto
+    code: Roboto Mono
+  palette:
+    - scheme: slate
+      primary: light blue
+      accent: light blue
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+    - scheme: default
+      primary: light blue
+      accent: light blue
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tasklist
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/UnAliveScripts/unaliveui
