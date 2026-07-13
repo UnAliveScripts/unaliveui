@@ -8,6 +8,7 @@ extra_css:
 nav:
   - Welcome: index.md
   - Getting Started:
+    - Overview: Getting Started/index.md
     - Interface Guidelines: Getting Started/interface-guidelines.md
     - Importing the Library: Getting Started/importing-the-library.md
     - Building From Source: Getting Started/building-from-source.md

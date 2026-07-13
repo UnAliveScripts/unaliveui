@@ -1,44 +1,48 @@
 # Components
 
-UnAlive provides a growing library of macOS-inspired components.
+UnAlive provides a growing library of macOS-inspired components to build your interfaces.
 
-## Available Components
+All components share a consistent API — once you learn one, you can use them all.
 
-- [Window](Window.md) — A draggable macOS-style window
-- [Card](Card.md) — A content container with shadow
+## List of Components
+
+- [Window](Window.md) — A high-level container with drag support and title bar
+- [Card](Card.md) — A rounded content container with shadow
 - [SubCard](SubCard.md) — A smaller card container
-- [Page](Page.md) — A scrolling page container
-- [Row](Row.md) — A labeled info row
-- [Label](Label.md) — Text label
-- [Icon](Icon.md) — Image label for icons
-- [Button](Button.md) — Action button with hover
-- [Toggle](Toggle.md) — On/off switch
-- [Stepper](Stepper.md) — Increment/decrement control
-- [Slider](Slider.md) — Range slider
-- [TextField](TextField.md) — Text input field
-- [Notification](Notification.md) — Popup notification
-- [EditMenu](EditMenu.md) — Tabbed edit menu bar
-- [WindowPill](WindowPill.md) — macOS minimize pill
+- [Page](Page.md) — A scrolling page for content
+- [Row](Row.md) — A labeled information row
+- [Label](Label.md) — A static text label
+- [Icon](Icon.md) — An image-based icon
+- [Button](Button.md) — An action button with states
+- [Toggle](Toggle.md) — An on/off switch
+- [Stepper](Stepper.md) — A numeric increment/decrement control
+- [Slider](Slider.md) — A draggable range slider
+- [TextField](TextField.md) — A text input field
+- [Notification](Notification.md) — A popup alert notification
+- [EditMenu](EditMenu.md) — A glass-styled tab bar
+- [WindowPill](WindowPill.md) — A minimize/restore pill
 
-## Common Properties
+## BaseComponent
 
-Every component inherits these base properties:
+Every component inherits from `BaseComponent`, which provides core functionality.
+
+### Properties
 
 | Property | Type | Description |
 | -------- | ---- | ----------- |
-| `Parent` | `Instance` | Parent GUI instance |
-| `Visible` | `boolean?` | Visibility state |
+| `Parent` | `#!luau Instance?` | The parent GUI instance the component is placed in. |
 
-## Common Methods
+### Methods
 
-| Method | Description |
-| ------ | ----------- |
-| `:Parent(parent)` | Set the parent instance |
-| `:Destroy()` | Clean up the component |
+| Method     | Signature | Description |
+| ---------- | --------- | ----------- |
+| `Destroy`  | `#!luau (self: BaseComponent) -> ()` | Destroys the component and its instances. |
 
-## Common Return Values
+### Shared Return Values
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `Type` | `string` | The component type name |
-| `Instance` | `Instance` | The root Roblox instance |
+Every component returns a table with these common fields:
+
+| Field    | Type       | Description                         |
+| -------- | ---------- | ----------------------------------- |
+| `Type`   | `string`   | The component type name.            |
+| `Instance`| `Instance` | The root Roblox instance.           |

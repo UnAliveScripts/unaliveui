@@ -1,6 +1,8 @@
+<!-- markdownlint-disable MD056 -->
+
 # WindowPill
 
-A `WindowPill` is a macOS-style minimize restore pill shown at the top of the screen.
+A `WindowPill` is a macOS-style minimize pill displayed at the top center of the screen.
 
 ## Summary
 
@@ -8,12 +10,33 @@ A `WindowPill` is a macOS-style minimize restore pill shown at the top of the sc
 
 No configurable properties.
 
+[View all inherited from `ImageButton`](https://create.roblox.com/docs/reference/engine/classes/ImageButton#summary-properties)
+
 ### Methods
 
 | Method    | Signature | Description |
 | --------- | --------- | ----------- |
-| `OnClick` | `(callback: () -> ()) -> ()` | Set click handler for minimize/restore |
-| `Destroy` | `() -> ()` | Remove the pill |
+| `OnClick` | `#!luau ((self: WindowPill) -> ())` | Sets a callback for when the pill is clicked. |
+
+[View all inherited from `ImageButton`](https://create.roblox.com/docs/reference/engine/classes/ImageButton#summary-methods)
+
+### Events
+
+[View all inherited from `ImageButton`](https://create.roblox.com/docs/reference/engine/classes/ImageButton#summary-events)
+
+## Types
+
+```luau
+type WindowPillProperties = ImageButton & {}
+
+type WindowPill = BaseComponent & Components & WindowPillProperties
+```
+
+### Function Signature
+
+```luau
+function(self, properties: WindowPillProperties?): WindowPill
+```
 
 ## Example
 
@@ -22,4 +45,7 @@ local pill = UnAlive:New("WindowPill")
 pill:OnClick(function()
     print("Pill clicked — toggle minimize")
 end)
+
+print(pill:IsA("ImageButton")) --> true
+print(pill.Type) --> "WindowPill"
 ```
