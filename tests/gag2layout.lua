@@ -246,13 +246,98 @@ syncPH()
 local pages = Instance.new("Frame", card); pages.Name = "Pages"
 pages.Size = UDim2.fromOffset(496, 200); pages.Position = UDim2.fromOffset(0, 50)
 pages.BackgroundTransparency = 1; pages.BorderSizePixel = 0; pages.ZIndex = 20
-local pageData = {{"Farm","Manage your farm resources and crops"},{"Shop","Browse items available for purchase"},{"Steal","Steal resources from other players"},{"Spawn","Spawn vehicles, items, and more"},{"Config","Configure your settings and preferences"},{"Settings","Adjust your application settings and preferences"}}
+local pageData = {{"Gag2",""},{"Shop","Browse items available for purchase"},{"Steal","Steal resources from other players"},{"Spawn","Spawn vehicles, items, and more"},{"Config","Configure your settings and preferences"},{"Settings","Adjust your application settings and preferences"}}
 for pi, pd in ipairs(pageData) do
 	local pg = Instance.new("Frame", pages); pg.Name = "Page"..pi; pg.Size = UDim2.fromScale(1,1); pg.BackgroundTransparency = 1; pg.BorderSizePixel = 0; pg.ZIndex = 20; pg.Visible = pi == 1
-	local lbl = Instance.new("TextLabel", pg); lbl.Size = UDim2.fromOffset(200,30); lbl.Position = UDim2.fromOffset(20,40); lbl.BackgroundTransparency = 1
-	lbl.FontFace = Font.new("rbxassetid://12187365364"); lbl.Text = pd[1]; lbl.TextSize = 24; lbl.TextColor3 = Color3.fromRGB(255,255,255); lbl.TextXAlignment = Enum.TextXAlignment.Left
 	local desc = Instance.new("TextLabel", pg); desc.Size = UDim2.fromOffset(400,20); desc.Position = UDim2.fromOffset(20,80); desc.BackgroundTransparency = 1
 	desc.FontFace = Font.new("rbxassetid://12187365364"); desc.Text = pd[2]; desc.TextSize = 14; desc.TextColor3 = Color3.fromRGB(180,180,190); desc.TextXAlignment = Enum.TextXAlignment.Left
+	if pi > 1 then
+		local lbl = Instance.new("TextLabel", pg); lbl.Size = UDim2.fromOffset(200,30); lbl.Position = UDim2.fromOffset(20,40); lbl.BackgroundTransparency = 1
+		lbl.FontFace = Font.new("rbxassetid://12187365364"); lbl.Text = pd[1]; lbl.TextSize = 24; lbl.TextColor3 = Color3.fromRGB(255,255,255); lbl.TextXAlignment = Enum.TextXAlignment.Left
+	end
+end
+
+-- === PAGE 1 LAYOUT ===
+local T = game:GetService("TweenService")
+
+local function tgl(x, y, text, default)
+	local bg = Instance.new("ImageButton", pg1)
+	bg.Size = UDim2.fromOffset(44, 24); bg.Position = UDim2.fromOffset(x, y)
+	bg.AutoButtonColor = false; bg.BorderSizePixel = 0
+	bg.BackgroundColor3 = default and Color3.fromRGB(71, 140, 246) or Color3.fromRGB(58, 58, 60)
+	Instance.new("UICorner", bg).CornerRadius = UDim.new(1, 0)
+	local knob = Instance.new("Frame", bg)
+	knob.Size = UDim2.fromOffset(20, 20); knob.Position = default and UDim2.fromOffset(22, 2) or UDim2.fromOffset(2, 2)
+	knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255); knob.BorderSizePixel = 0
+	Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
+	local lbl = Instance.new("TextLabel", pg1)
+	lbl.Size = UDim2.fromOffset(50, 24); lbl.Position = UDim2.fromOffset(x + 48, y)
+	lbl.BackgroundTransparency = 1; lbl.FontFace = Font.new("rbxassetid://12187365364")
+	lbl.TextSize = 13; lbl.TextColor3 = Color3.fromRGB(245, 245, 245); lbl.Text = text
+	lbl.TextXAlignment = Enum.TextXAlignment.Left; lbl.TextYAlignment = Enum.TextYAlignment.Center
+	local state = default
+	bg.MouseButton1Click:Connect(function()
+		state = not state
+		bg.BackgroundColor3 = state and Color3.fromRGB(71, 140, 246) or Color3.fromRGB(58, 58, 60)
+		T:Create(knob, TweenInfo.new(0.2), {Position = state and UDim2.fromOffset(22, 2) or UDim2.fromOffset(2, 2)}):Play()
+	end)
+end
+
+local function sld(x, y, w, val, max, sfx)
+	local track = Instance.new("Frame", pg1)
+	track.Size = UDim2.fromOffset(w or 60, 4); track.Position = UDim2.fromOffset(x, y + 10)
+	track.BackgroundColor3 = Color3.fromRGB(44, 44, 46); track.BorderSizePixel = 0
+	Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
+	local fill = Instance.new("Frame", track)
+	fill.Size = UDim2.fromScale((val or 0) / (max or 100), 1)
+	fill.BackgroundColor3 = Color3.fromRGB(0, 122, 255); fill.BorderSizePixel = 0
+	Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+	local lbl = Instance.new("TextLabel", pg1)
+	lbl.Size = UDim2.fromOffset(50, 20); lbl.Position = UDim2.fromOffset(x + (w or 60) + 5, y)
+	lbl.BackgroundTransparency = 1; lbl.FontFace = Font.new("rbxassetid://12187365364")
+	lbl.TextSize = 12; lbl.TextColor3 = Color3.fromRGB(180, 180, 190)
+	lbl.Text = tostring(val or 0) .. (sfx or "")
+	lbl.TextXAlignment = Enum.TextXAlignment.Left; lbl.TextYAlignment = Enum.TextYAlignment.Center
+end
+
+local function pdown(x, y, text)
+	local btn = Instance.new("TextButton", pg1)
+	btn.Size = UDim2.fromOffset(70, 22); btn.Position = UDim2.fromOffset(x, y)
+	btn.BackgroundColor3 = Color3.fromRGB(55, 55, 58); btn.BorderSizePixel = 0
+	btn.Text = text or ""; btn.FontFace = Font.new("rbxassetid://12187365364")
+	btn.TextSize = 12; btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.AutoButtonColor = false
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+end
+
+local function sec(text, y)
+	local lbl = Instance.new("TextLabel", pg1)
+	lbl.Size = UDim2.fromOffset(460, 18); lbl.Position = UDim2.fromOffset(10, y)
+	lbl.BackgroundTransparency = 1; lbl.Font = Enum.Font.GothamSemibold
+	lbl.TextSize = 13; lbl.TextColor3 = Color3.fromRGB(255, 66, 84); lbl.Text = text
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+end
+
+local pg1 = pages:FindFirstChild("Page1")
+if pg1 then
+	local Y = 6
+	tgl(10, Y, "Expand"); tgl(108, Y, "Daily"); tgl(206, Y, "Pot"); Y = 30
+	sec("PLANT / HARVEST / SELL", Y); Y = Y + 22
+	tgl(10, Y, "Plant"); pdown(108, Y+1, "Wheat"); sld(188, Y, 60, 4, 10, ""); Y = Y + 28
+	tgl(10, Y, "Harvest"); sld(108, Y, 60, 10, 10, "s"); tgl(225, Y, "Sell"); Y = Y + 28
+	local si = Instance.new("TextLabel", pg1)
+	si.Size = UDim2.fromOffset(100, 20); si.Position = UDim2.fromOffset(10, Y)
+	si.BackgroundTransparency = 1; si.FontFace = Font.new("rbxassetid://12187365364")
+	si.TextSize = 13; si.TextColor3 = Color3.fromRGB(245, 245, 245); si.Text = "Sell Interval"
+	si.TextXAlignment = Enum.TextXAlignment.Left; si.TextYAlignment = Enum.TextYAlignment.Center
+	sld(120, Y, 80, 15, 100, "s"); Y = Y + 28
+	sec("BOOSTS", Y); Y = Y + 22
+	tgl(10, Y, "Sprinkler"); sld(108, Y, 60, 30, 100, "s"); Y = Y + 28
+	tgl(10, Y, "Water"); sld(108, Y, 60, 8, 100, "s"); Y = Y + 28
+	tgl(10, Y, "Smart Inventory"); Y = Y + 28
+	sec("PETS & OPEN", Y); Y = Y + 22
+	tgl(10, Y, "Equip"); tgl(108, Y, "Slots"); Y = Y + 28
+	tgl(10, Y, "Sell Pets"); pdown(108, Y+1, "Select..."); Y = Y + 28
+	tgl(10, Y, "Eggs", true); tgl(108, Y, "Crates", true); tgl(206, Y, "Packs", true)
 end
 
 -- EditMenu
