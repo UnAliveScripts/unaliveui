@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 --[[
     UnAliveUI — Gag2 Layout
     Example layout using the UnAliveUI library.
@@ -91,6 +90,3 @@ local notification = UnAlive:New("Notification", {
 local pill = UnAlive:New("WindowPill")
 
 print("[Gag2] Layout loaded")
-=======
-gag2
->>>>>>> b5aa80591d3d0bbb842490035b539eb19f0de85e
