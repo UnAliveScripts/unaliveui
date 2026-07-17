@@ -209,7 +209,6 @@ UserInputService.InputEnded:Connect(function(i)
     end
 end)
 
-<<<<<<< HEAD
 -- === MAIN UI COMPONENTS ===
 local TS = TweenService
 local normalColor = Color3.fromRGB(245, 245, 245)
@@ -296,11 +295,6 @@ Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
 local ii = Instance.new("ImageLabel", ind); ii.Size = UDim2.fromOffset(24,24); ii.Position = UDim2.fromOffset(6,6)
 ii.BackgroundTransparency = 1; ii.Image = "rbxassetid://103603118195781"; ii.ImageColor3 = white; ii.ScaleType = Enum.ScaleType.Fit; ii.ZIndex = 22
 
-=======
--- ==============================
--- CUSTOM COMPONENTS GO BELOW
--- ==============================
->>>>>>> d6daff0 (remove label from gag2 layout)
 -- WindowPill (separate ScreenGui, stays visible when minimized)
 local pillGui = Instance.new("ScreenGui")
 pillGui.Name = "UnAliveUI_Pill"
