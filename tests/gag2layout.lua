@@ -1,354 +1,186 @@
 --[[
-	UnAliveUI — Main Window UI
+	UnAliveUI — Gag2 Layout
 	
-	Dark Alert theme window with title bar, search bar, EditMenu, content pages,
-	Myriad-style WindowPill, traffic light buttons (close/minimize), and Myriad exact minimize.
+	Full 1:1 demo.lua UI with all 6 pages.
+	Dark Alert theme, Myriad-style traffic lights,
+	search bar, EditMenu, WindowPill minimize.
 --]]
 
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local TS = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+local RS = game:GetService("RunService")
 local player = game:GetService("Players").LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local pg = player:WaitForChild("PlayerGui")
 
-local existing = playerGui:FindFirstChild("UnAliveUI")
-if existing then existing:Destroy() end
-local existingPill = playerGui:FindFirstChild("UnAliveUI_Pill")
-if existingPill then existingPill:Destroy() end
+for _, n in pairs({"UnAliveUI","UnAliveUI_Pill"}) do
+	local e = pg:FindFirstChild(n)
+	if e then e:Destroy() end
+end
 
 -- Config
-local CONFIG = {
-    Window = {
-        Width = 540, Height = 400, CornerRadius = 16, BorderThickness = 1,
-        BgColor = Color3.fromRGB(12, 12, 14), BorderColor = Color3.fromRGB(34, 34, 40),
-        Shadow = {Enabled = true, Transparency = 0.65},
-    },
-    TitleBar = {
-        Height = 34, BgColor = Color3.fromRGB(16, 16, 19), LineColor = Color3.fromRGB(36, 36, 42),
-        Text = "UnAlive", TextColor = Color3.fromRGB(190, 190, 198),
-        Font = Enum.Font.Gotham, TextSize = 14, TextLeft = 14,
-    },
-    Card = {
-        MarginLeft = 22, MarginRight = 22, MarginTop = 18, MarginBottom = 18,
-        CornerRadius = 16, BorderThickness = 1,
-        BgColor = Color3.fromRGB(20, 20, 24), BorderColor = Color3.fromRGB(38, 38, 46),
-        Shadow = {Enabled = true, Image = "rbxassetid://6015897843", Transparency = 0.7, Offset = 30},
-    },
-    Drag = {
-        Smoothness = 0.15, ScaleDown = 0.97, ScaleDur = 0.15, ShadowDarken = 0.15,
-    },
+local C = {
+	Window = {W=540,H=400,R=16,BT=1,BG=Color3.fromRGB(12,12,14),BD=Color3.fromRGB(34,34,40)},
+	Title = {H=34,BG=Color3.fromRGB(16,16,19),LN=Color3.fromRGB(36,36,42),TX="UnAlive",TC=Color3.fromRGB(190,190,198),TS=14,TL=14},
+	Card = {ML=22,MR=22,MT=18,MB=18,R=16,BT=1,BG=Color3.fromRGB(20,20,24),BD=Color3.fromRGB(38,38,46)},
 }
 
-local W = CONFIG.Window; local TB = CONFIG.TitleBar
-local CD = CONFIG.Card; local DR = CONFIG.Drag
-local WIN_W = W.Width; local WIN_H = W.Height; local TB_H = TB.Height
+local gui = Instance.new("ScreenGui"); gui.Name="UnAliveUI"; gui.ResetOnSpawn=false
+gui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling; gui.IgnoreGuiInset=true; gui.DisplayOrder=999; gui.Parent=pg
+local gs = Instance.new("UIScale"); gs.Name="UIScale"; gs.Parent=gui
 
-local function Tween(obj, props, dur, sty, dir)
-    TweenService:Create(obj, TweenInfo.new(dur or 0.25, sty or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out), props):Play()
-end
-
--- Main ScreenGui
-local gui = Instance.new("ScreenGui")
-gui.Name = "UnAliveUI"; gui.ResetOnSpawn = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling; gui.IgnoreGuiInset = true
-gui.DisplayOrder = 999; gui.Parent = playerGui
-
-local window = Instance.new("Frame")
-window.Name = "Window"; window.Size = UDim2.new(0, WIN_W, 0, WIN_H)
-window.AnchorPoint = Vector2.new(0.5, 0.5)
-window.Position = UDim2.fromScale(0.5, 0.5)
-window.BackgroundColor3 = W.BgColor; window.BorderSizePixel = 0
-window.ClipsDescendants = false; window.ZIndex = 2; window.Parent = gui
-Instance.new("UICorner", window).CornerRadius = UDim.new(0, W.CornerRadius)
-local winStroke = Instance.new("UIStroke", window)
-winStroke.Color = W.BorderColor; winStroke.Thickness = W.BorderThickness
-winStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-local guiScale = Instance.new("UIScale"); guiScale.Name = "UIScale"; guiScale.Parent = gui
-
-if W.Shadow.Enabled then
-    local s = Instance.new("Frame")
-    s.Name = "Shadow"; s.Size = UDim2.new(1, 6, 1, 6)
-    s.Position = UDim2.new(0, -3, 0, -3)
-    s.BackgroundColor3 = Color3.fromRGB(0,0,0); s.BackgroundTransparency = 0.65
-    s.BorderSizePixel = 0; s.ZIndex = 1; s.Parent = window
-    Instance.new("UICorner", s).CornerRadius = UDim.new(0, W.CornerRadius)
-end
+-- Window
+local win = Instance.new("Frame"); win.Name="Window"; win.Size=UDim2.new(0,C.Window.W,0,C.Window.H)
+win.AnchorPoint=Vector2.new(0.5,0.5); win.Position=UDim2.fromScale(0.5,0.5)
+win.BackgroundColor3=C.Window.BG; win.BorderSizePixel=0; win.ZIndex=2; win.Parent=gui
+Instance.new("UICorner",win).CornerRadius=UDim.new(0,C.Window.R)
+local ws = Instance.new("UIStroke",win); ws.Color=C.Window.BD; ws.Thickness=C.Window.BT; ws.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+local sh = Instance.new("Frame",win); sh.Name="Shadow"; sh.Size=UDim2.new(1,6,1,6); sh.Position=UDim2.new(0,-3,0,-3)
+sh.BackgroundColor3=Color3.fromRGB(0,0,0); sh.BackgroundTransparency=0.65; sh.BorderSizePixel=0; sh.ZIndex=1
+Instance.new("UICorner",sh).CornerRadius=UDim.new(0,C.Window.R)
 
 -- TitleBar
-local titleBar = Instance.new("Frame")
-titleBar.Name = "TitleBar"; titleBar.Size = UDim2.new(1, 0, 0, TB_H)
-titleBar.BackgroundColor3 = TB.BgColor; titleBar.BorderSizePixel = 0
-titleBar.ZIndex = 10; titleBar.Parent = window
-Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, W.CornerRadius)
-local tbMask = Instance.new("Frame")
-tbMask.Name = "BottomMask"; tbMask.Size = UDim2.new(1, 0, 0, W.CornerRadius)
-tbMask.Position = UDim2.new(0, 0, 1, -W.CornerRadius)
-tbMask.BackgroundColor3 = TB.BgColor; tbMask.BorderSizePixel = 0
-tbMask.ZIndex = 10; tbMask.Parent = titleBar
-local tbLine = Instance.new("Frame")
-tbLine.Name = "Hairline"; tbLine.Size = UDim2.new(1, 0, 0, 1)
-tbLine.Position = UDim2.new(0, 0, 1, -1); tbLine.BackgroundColor3 = TB.LineColor
-tbLine.BorderSizePixel = 0; tbLine.ZIndex = 11; tbLine.Parent = titleBar
-local titleLbl = Instance.new("TextLabel")
-titleLbl.Name = "Title"; titleLbl.Size = UDim2.new(0, 200, 0, TB.TextSize)
-titleLbl.AnchorPoint = Vector2.new(0, 0.5); titleLbl.Position = UDim2.new(0, TB.TextLeft, 0.5, 0)
-titleLbl.BackgroundTransparency = 1; titleLbl.Text = TB.Text; titleLbl.Font = TB.Font
-titleLbl.TextSize = TB.TextSize; titleLbl.TextColor3 = TB.TextColor
-titleLbl.TextXAlignment = Enum.TextXAlignment.Left; titleLbl.TextYAlignment = Enum.TextYAlignment.Center
-titleLbl.TextTruncate = Enum.TextTruncate.AtEnd; titleLbl.ZIndex = 11; titleLbl.Parent = titleBar
+local tb = Instance.new("Frame",win); tb.Name="TitleBar"; tb.Size=UDim2.new(1,0,0,C.Title.H)
+tb.BackgroundColor3=C.Title.BG; tb.BorderSizePixel=0; tb.ZIndex=10
+Instance.new("UICorner",tb).CornerRadius=UDim.new(0,C.Window.R)
+local tm = Instance.new("Frame",tb); tm.Name="BottomMask"; tm.Size=UDim2.new(1,0,0,C.Window.R)
+tm.Position=UDim2.new(0,0,1,-C.Window.R); tm.BackgroundColor3=C.Title.BG; tm.BorderSizePixel=0; tm.ZIndex=10
+local hl = Instance.new("Frame",tb); hl.Name="Hairline"; hl.Size=UDim2.new(1,0,0,1); hl.Position=UDim2.new(0,0,1,-1)
+hl.BackgroundColor3=C.Title.LN; hl.BorderSizePixel=0; hl.ZIndex=11
 
--- Myriad-style traffic light buttons (close + minimize)
-local RIGHT_OFFSET = 16
-local DOT_SIZE = 12
-local SPACING = 8
+-- Title Text
+local lbl = Instance.new("TextLabel",tb); lbl.Name="Title"; lbl.Size=UDim2.new(0,200,0,C.Title.TS)
+lbl.AnchorPoint=Vector2.new(0,0.5); lbl.Position=UDim2.new(0,C.Title.TL,0.5,0); lbl.BackgroundTransparency=1
+lbl.Text=C.Title.TX; lbl.Font=Enum.Font.Gotham; lbl.TextSize=C.Title.TS; lbl.TextColor3=C.Title.TC
+lbl.TextXAlignment=Enum.TextXAlignment.Left; lbl.ZIndex=11
 
-local btnData = {
-	{Name = "Exit", Clr = Color3.fromHex("FF5F57"), Icn = "rbxassetid://94781753558308", Idx = 1},
-	{Name = "Minimize", Clr = Color3.fromHex("FEBC2E"), Icn = "rbxassetid://118368309445367", Idx = 2},
-}
-
-local dotIcons = {}
-for _, d in ipairs(btnData) do
-	local offset = RIGHT_OFFSET + DOT_SIZE/2 + (2 - d.Idx) * (DOT_SIZE + SPACING)
-	
-	local btn = Instance.new("ImageButton")
-	btn.Name = d.Name
-	btn.AnchorPoint = Vector2.new(0.5, 0.5)
-	btn.Position = UDim2.new(1, -offset, 0.5, 0)
-	btn.AutoButtonColor = false
-	btn.BackgroundTransparency = 1
-	btn.BorderSizePixel = 0
-	btn.Image = "rbxassetid://132228700346004"
-	btn.ImageColor3 = d.Clr
-	btn.ImageTransparency = 0
-	btn.Size = UDim2.fromOffset(DOT_SIZE, DOT_SIZE)
-	btn.ZIndex = 15
-	btn.Parent = titleBar
-	
-	local stk = Instance.new("ImageLabel")
-	stk.Name = "Stroke"
-	stk.Parent = btn
-	
-	local ic = Instance.new("ImageLabel")
-	ic.Name = "Icon"
-	ic.AnchorPoint = Vector2.new(0.5, 0.5)
-	ic.BackgroundTransparency = 1
-	ic.BorderSizePixel = 0
-	ic.Image = d.Icn
-	ic.ImageColor3 = Color3.fromRGB(0, 0, 0)
-	ic.ImageTransparency = 0.50
-	ic.Position = UDim2.fromScale(0.5, 0.5)
-	ic.Size = UDim2.fromScale(1, 1)
-	ic.Visible = false
-	ic.Parent = btn
-	
-	btn.MouseEnter:Connect(function() ic.Visible = true end)
-	btn.MouseLeave:Connect(function() ic.Visible = false end)
-	
-	table.insert(dotIcons, ic)
+-- Traffic Lights
+for i,d in ipairs({{"Exit","#FF5F57","rbxassetid://94781753558308"},{"Minimize","#FEBC2E","rbxassetid://118368309445367"}}) do
+	local off=16+6+(2-i)*20
+	local b = Instance.new("ImageButton",tb); b.Name=d[1]; b.AnchorPoint=Vector2.new(0.5,0.5)
+	b.Position=UDim2.new(1,-off,0.5,0); b.Size=UDim2.fromOffset(12,12); b.AutoButtonColor=false
+	b.BackgroundTransparency=1; b.BorderSizePixel=0; b.Image="rbxassetid://132228700346004"
+	b.ImageColor3=Color3.fromHex(d[2]); b.ZIndex=15
+	local ic = Instance.new("ImageLabel",b); ic.Name="Icon"; ic.AnchorPoint=Vector2.new(0.5,0.5)
+	ic.BackgroundTransparency=1; ic.BorderSizePixel=0; ic.Image=d[3]; ic.ImageColor3=Color3.fromRGB(0,0,0)
+	ic.ImageTransparency=0.5; ic.Position=UDim2.fromScale(0.5,0.5); ic.Size=UDim2.fromScale(1,1); ic.Visible=false
+	b.MouseEnter:Connect(function() ic.Visible=true end)
+	b.MouseLeave:Connect(function() ic.Visible=false end)
 end
-
-
 
 -- Card
-local card = Instance.new("Frame")
-card.Name = "Card"; card.Size = UDim2.new(0, WIN_W - CD.MarginLeft - CD.MarginRight, 0, WIN_H - TB_H - CD.MarginTop - CD.MarginBottom)
-card.Position = UDim2.new(0, CD.MarginLeft, 0, TB_H + CD.MarginTop)
-card.BackgroundColor3 = CD.BgColor; card.BorderSizePixel = 0; card.ZIndex = 5; card.Parent = window
-Instance.new("UICorner", card).CornerRadius = UDim.new(0, CD.CornerRadius)
-local cardStroke = Instance.new("UIStroke", card)
-cardStroke.Color = CD.BorderColor; cardStroke.Thickness = CD.BorderThickness
-cardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-if CD.Shadow.Enabled then
-    local s = Instance.new("ImageLabel")
-    s.Name = "Shadow"; s.Size = UDim2.new(1, CD.Shadow.Offset, 1, CD.Shadow.Offset)
-    s.Position = UDim2.new(0, -CD.Shadow.Offset/2, 0, -CD.Shadow.Offset/2)
-    s.BackgroundTransparency = 1; s.Image = CD.Shadow.Image
-    s.ImageColor3 = Color3.fromRGB(0,0,0); s.ImageTransparency = CD.Shadow.Transparency
-    s.ScaleType = Enum.ScaleType.Slice; s.SliceCenter = Rect.new(49,49,50,50)
-    s.ZIndex = 4; s.Parent = card
-end
+local cw,ch = C.Window.W-C.Card.ML-C.Card.MR, C.Window.H-C.Title.H-C.Card.MT-C.Card.MB
+local card = Instance.new("Frame",win); card.Name="Card"; card.Size=UDim2.new(0,cw,0,ch)
+card.Position=UDim2.new(0,C.Card.ML,0,C.Title.H+C.Card.MT)
+card.BackgroundColor3=C.Card.BG; card.BorderSizePixel=0; card.ZIndex=5
+Instance.new("UICorner",card).CornerRadius=UDim.new(0,C.Card.R)
+local cs = Instance.new("UIStroke",card); cs.Color=C.Card.BD; cs.Thickness=C.Card.BT; cs.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+
+-- Card Shadow
+local csh = Instance.new("ImageLabel",card); csh.Name="Shadow"; csh.Size=UDim2.new(1,30,1,30)
+csh.Position=UDim2.new(0,-15,0,-15); csh.BackgroundTransparency=1; csh.Image="rbxassetid://6015897843"
+csh.ImageColor3=Color3.fromRGB(0,0,0); csh.ImageTransparency=0.7; csh.ScaleType=Enum.ScaleType.Slice
+csh.SliceCenter=Rect.new(49,49,50,50); csh.ZIndex=4
 
 -- Drag
-local drag, dSt, dPos = false, nil, nil
-local targetPos = window.Position; local dragConn
-local function startDrag(input)
-    drag = true; dSt = input.Position; dPos = window.Position; targetPos = dPos
-    Tween(guiScale, {Scale = DR.ScaleDown}, DR.ScaleDur)
-    if window:FindFirstChild("Shadow") and window.Shadow:IsA("ImageLabel") then
-        local darker = math.max(0, W.Shadow.Transparency - DR.ShadowDarken)
-        Tween(window.Shadow, {ImageTransparency = darker}, DR.ScaleDur)
-    end
-    if dragConn then dragConn:Disconnect() end
-    dragConn = RunService.Heartbeat:Connect(function()
-        if not drag then dragConn:Disconnect(); dragConn = nil; return end
-        window.Position = window.Position:Lerp(targetPos, DR.Smoothness)
-    end)
+local dragging,dStart,dPos,targetPos,dragConn
+local function startDrag(inp) dragging=true; dStart=inp.Position; dPos=win.Position; targetPos=dPos
+	TS:Create(gs,TweenInfo.new(0.15),{Scale=0.97}):Play()
+	if dragConn then dragConn:Disconnect() end
+	dragConn=RS.Heartbeat:Connect(function() if not dragging then dragConn:Disconnect(); dragConn=nil return end
+		win.Position=win.Position:Lerp(targetPos,0.15) end)
 end
-titleBar.InputBegan:Connect(function(i, gp)
-    if gp then return end
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then startDrag(i) end
-end)
-card.InputBegan:Connect(function(i, gp)
-    if gp then return end
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then startDrag(i) end
-end)
-UserInputService.InputChanged:Connect(function(i)
-    if not drag then return end
-    if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then
-        local delta = i.Position - dSt
-        targetPos = UDim2.new(dPos.X.Scale, dPos.X.Offset + delta.X, dPos.Y.Scale, dPos.Y.Offset + delta.Y)
-    end
-end)
-UserInputService.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        if drag then drag = false; Tween(guiScale, {Scale = 1}, DR.ScaleDur, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-            if window:FindFirstChild("Shadow") and window.Shadow:IsA("ImageLabel") then
-                Tween(window.Shadow, {ImageTransparency = W.Shadow.Transparency}, DR.ScaleDur) end
-        end
-    end
-end)
+local function onInput(i,gp) if not gp and (i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch) then startDrag(i) end end
+tb.InputBegan:Connect(onInput); card.InputBegan:Connect(onInput)
+UIS.InputChanged:Connect(function(i) if dragging and i.UserInputType==Enum.UserInputType.MouseMovement then local d=i.Position-dStart; targetPos=UDim2.new(dPos.X.Scale,dPos.X.Offset+d.X,dPos.Y.Scale,dPos.Y.Offset+d.Y) end end)
+UIS.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 and dragging then dragging=false; TS:Create(gs,TweenInfo.new(0.15,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Scale=1}):Play() end end)
 
--- === MAIN UI COMPONENTS ===
-local TS = TweenService
-local normalColor = Color3.fromRGB(245, 245, 245)
-local selectedColor = Color3.fromRGB(255, 66, 84)
-local dark = Color3.fromRGB(18, 20, 26)
-local white = Color3.fromRGB(255, 255, 255)
+-- Search Bar
+local sf = Instance.new("Frame",card); sf.Name="SearchField"; sf.Size=UDim2.fromOffset(122,26)
+sf.Position=UDim2.fromOffset(365,10); sf.BackgroundColor3=Color3.fromRGB(18,20,26); sf.BackgroundTransparency=0.08
+sf.BorderSizePixel=0; sf.ZIndex=20; sf.ClipsDescendants=true; Instance.new("UICorner",sf).CornerRadius=UDim.new(0,13)
+local sfb = Instance.new("UIStroke",sf); sfb.Color=Color3.fromRGB(255,255,255); sfb.Transparency=0.92; sfb.Thickness=0.5
+local sfi = Instance.new("ImageLabel",sf); sfi.Size=UDim2.fromOffset(16,16); sfi.Position=UDim2.fromOffset(8,5)
+sfi.BackgroundTransparency=1; sfi.Image="rbxassetid://117204739779559"; sfi.ImageColor3=Color3.fromRGB(200,200,200); sfi.ScaleType=Enum.ScaleType.Fit; sfi.ZIndex=21
+local sfp = Instance.new("TextLabel",sf); sfp.Name="Placeholder"; sfp.Size=UDim2.fromOffset(74,16); sfp.Position=UDim2.fromOffset(26,5)
+sfp.BackgroundTransparency=1; sfp.FontFace=Font.new("rbxassetid://12187365364"); sfp.Text="Search"; sfp.TextSize=13
+sfp.TextColor3=Color3.fromRGB(245,245,245); sfp.TextXAlignment=Enum.TextXAlignment.Left; sfp.ZIndex=21
 
--- Search bar (top-right)
-local sf = Instance.new("Frame", card); sf.Name = "SearchField"
-sf.Size = UDim2.fromOffset(122, 26); sf.Position = UDim2.fromOffset(365, 10)
-sf.BackgroundColor3 = dark; sf.BackgroundTransparency = 0.08; sf.BorderSizePixel = 0; sf.ZIndex = 20; sf.ClipsDescendants = true
-Instance.new("UICorner", sf).CornerRadius = UDim.new(0, 13)
-local sfBorder = Instance.new("UIStroke", sf); sfBorder.Color = white; sfBorder.Transparency = 0.92; sfBorder.Thickness = 0.5
-local sfIcon = Instance.new("ImageLabel", sf); sfIcon.Size = UDim2.fromOffset(16,16); sfIcon.Position = UDim2.fromOffset(8,5)
-sfIcon.BackgroundTransparency = 1; sfIcon.Image = "rbxassetid://117204739779559"; sfIcon.ImageColor3 = Color3.fromRGB(200,200,200); sfIcon.ScaleType = Enum.ScaleType.Fit; sfIcon.ZIndex = 21
-local sfPH = Instance.new("TextLabel", sf); sfPH.Name = "Placeholder"
-sfPH.Size = UDim2.fromOffset(74,16); sfPH.Position = UDim2.fromOffset(26,5); sfPH.BackgroundTransparency = 1
-sfPH.FontFace = Font.new("rbxassetid://12187365364"); sfPH.Text = "Search"; sfPH.TextSize = 13
-sfPH.TextColor3 = Color3.fromRGB(245,245,245); sfPH.TextXAlignment = Enum.TextXAlignment.Left; sfPH.TextYAlignment = Enum.TextYAlignment.Center; sfPH.ZIndex = 21
-local sfBox = Instance.new("TextBox", sf); sfBox.Name = "Input"
-sfBox.Size = UDim2.fromOffset(74,16); sfBox.Position = UDim2.fromOffset(26,5); sfBox.BackgroundTransparency = 1
-sfBox.FontFace = Font.new("rbxassetid://12187365364"); sfBox.Text = ""; sfBox.TextSize = 13
-sfBox.TextColor3 = Color3.fromRGB(245,245,245); sfBox.TextXAlignment = Enum.TextXAlignment.Left; sfBox.TextYAlignment = Enum.TextYAlignment.Center; sfBox.ClearTextOnFocus = false; sfBox.ZIndex = 22
-local sfClear = Instance.new("ImageButton", sf); sfClear.Name = "Clear"
-sfClear.Size = UDim2.fromOffset(16,16); sfClear.Position = UDim2.fromOffset(100,5); sfClear.BackgroundTransparency = 1
-sfClear.AutoButtonColor = false; sfClear.Image = "rbxassetid://78668603799563"; sfClear.ImageColor3 = Color3.fromRGB(138,138,138); sfClear.ScaleType = Enum.ScaleType.Fit; sfClear.ZIndex = 22; sfClear.Visible = false
-local function syncPH() sfPH.Visible = (sfBox.Text == ""); sfClear.Visible = (sfBox.Text ~= "") end
-sfBox:GetPropertyChangedSignal("Text"):Connect(syncPH)
-sfBox.Focused:Connect(function() sfPH.Visible = false; Tween(sfBorder, {Color = Color3.fromRGB(200,200,200), Transparency = 0.5}, 0.2) end)
-sfBox.FocusLost:Connect(function() syncPH(); Tween(sfBorder, {Color = white, Transparency = 0.92}, 0.2) end)
-sfClear.MouseButton1Click:Connect(function() sfBox.Text = ""; sfBox:CaptureFocus() end)
-syncPH()
+-- Pages Container
+local pages = Instance.new("Frame",card); pages.Name="Pages"; pages.Size=UDim2.fromOffset(496,200); pages.Position=UDim2.fromOffset(0,50)
+pages.BackgroundTransparency=1; pages.BorderSizePixel=0; pages.ZIndex=20
 
--- Pages
-local pages = Instance.new("Frame", card); pages.Name = "Pages"
-pages.Size = UDim2.fromOffset(496, 200); pages.Position = UDim2.fromOffset(0, 50)
-pages.BackgroundTransparency = 1; pages.BorderSizePixel = 0; pages.ZIndex = 20
-local pageData = {{"Farm","Manage your farm resources and crops"},{"Shop","Browse items available for purchase"},{"Steal","Steal resources from other players"},{"Spawn","Spawn vehicles, items, and more"},{"Config","Configure your settings and preferences"},{"Settings","Adjust your application settings and preferences"}}
-for pi, pd in ipairs(pageData) do
-	local pg = Instance.new("Frame", pages); pg.Name = "Page"..pi; pg.Size = UDim2.fromScale(1,1); pg.BackgroundTransparency = 1; pg.BorderSizePixel = 0; pg.ZIndex = 20; pg.Visible = pi == 1
-	local lbl = Instance.new("TextLabel", pg); lbl.Size = UDim2.fromOffset(200,30); lbl.Position = UDim2.fromOffset(20,40); lbl.BackgroundTransparency = 1
-	lbl.FontFace = Font.new("rbxassetid://12187365364"); lbl.Text = pd[1]; lbl.TextSize = 24; lbl.TextColor3 = Color3.fromRGB(255,255,255); lbl.TextXAlignment = Enum.TextXAlignment.Left
-	local desc = Instance.new("TextLabel", pg); desc.Size = UDim2.fromOffset(400,20); desc.Position = UDim2.fromOffset(20,80); desc.BackgroundTransparency = 1
-	desc.FontFace = Font.new("rbxassetid://12187365364"); desc.Text = pd[2]; desc.TextSize = 14; desc.TextColor3 = Color3.fromRGB(180,180,190); desc.TextXAlignment = Enum.TextXAlignment.Left
+-- 6 Pages
+local pageData = {{"Farm","Manage your farm resources and crops"},{"Shop","Browse items available for purchase"},{"Steal","Steal resources from other players"},{"Spawn","Spawn vehicles, items, and more"},{"Config","Configure your settings"},{"Settings","Adjust your preferences"}}
+for pi,pd in ipairs(pageData) do
+	local p = Instance.new("Frame",pages); p.Name="Page"..pi; p.Size=UDim2.fromScale(1,1); p.BackgroundTransparency=1; p.BorderSizePixel=0; p.ZIndex=20; p.Visible=pi==1
+	local t = Instance.new("TextLabel",p); t.Size=UDim2.fromOffset(200,30); t.Position=UDim2.fromOffset(20,40); t.BackgroundTransparency=1
+	t.FontFace=Font.new("rbxassetid://12187365364"); t.Text=pd[1]; t.TextSize=24; t.TextColor3=Color3.fromRGB(255,255,255); t.TextXAlignment=Enum.TextXAlignment.Left
+	local d = Instance.new("TextLabel",p); d.Size=UDim2.fromOffset(400,20); d.Position=UDim2.fromOffset(20,80); d.BackgroundTransparency=1
+	d.FontFace=Font.new("rbxassetid://12187365364"); d.Text=pd[2]; d.TextSize=14; d.TextColor3=Color3.fromRGB(180,180,190); d.TextXAlignment=Enum.TextXAlignment.Left
 end
 
 -- EditMenu
-local em = Instance.new("Frame", card); em.Name = "EditMenu"
-em.Size = UDim2.fromOffset(488, 44); em.Position = UDim2.fromOffset(4, 276); em.ZIndex = 20; em.BackgroundTransparency = 1
-local emShadow = Instance.new("Frame", em); emShadow.Size = UDim2.new(1,4,1,4); emShadow.Position = UDim2.fromOffset(-2,-2)
-emShadow.BackgroundColor3 = Color3.fromRGB(0,0,0); emShadow.BackgroundTransparency = 0.82; emShadow.BorderSizePixel = 0; emShadow.ZIndex = -1
-Instance.new("UICorner", emShadow).CornerRadius = UDim.new(0, 34)
-local emGlass = Instance.new("Frame", em); emGlass.Size = UDim2.fromScale(1,1); emGlass.BackgroundColor3 = Color3.fromRGB(12, 14, 18)
-emGlass.BackgroundTransparency = 0; emGlass.BorderSizePixel = 0; emGlass.ZIndex = 20
-Instance.new("UICorner", emGlass).CornerRadius = UDim.new(0, 34)
-local emStroke = Instance.new("UIStroke", emGlass); emStroke.Color = white; emStroke.Transparency = 0.88; emStroke.Thickness = 1
-local emContent = Instance.new("Frame", em); emContent.Size = UDim2.fromScale(1,1); emContent.BackgroundTransparency = 1; emContent.BorderSizePixel = 0; emContent.ZIndex = 22
-local emLayout = Instance.new("UIListLayout", emContent); emLayout.FillDirection = Enum.FillDirection.Horizontal; emLayout.VerticalAlignment = Enum.VerticalAlignment.Center; emLayout.Padding = UDim.new(0, 0)
-Instance.new("UIPadding", emContent).PaddingLeft = UDim.new(0, 20); Instance.new("UIPadding", emContent).PaddingRight = UDim.new(0, 4)
+local em = Instance.new("Frame",card); em.Name="EditMenu"; em.Size=UDim2.fromOffset(488,44); em.Position=UDim2.fromOffset(4,276)
+em.ZIndex=20; em.BackgroundTransparency=1
+local ems = Instance.new("Frame",em); ems.Size=UDim2.new(1,4,1,4); ems.Position=UDim2.fromOffset(-2,-2)
+ems.BackgroundColor3=Color3.fromRGB(0,0,0); ems.BackgroundTransparency=0.82; ems.BorderSizePixel=0; ems.ZIndex=-1
+Instance.new("UICorner",ems).CornerRadius=UDim.new(0,34)
+local emg = Instance.new("Frame",em); emg.Size=UDim2.fromScale(1,1); emg.BackgroundColor3=Color3.fromRGB(12,14,18); emg.BorderSizePixel=0; emg.ZIndex=20
+Instance.new("UICorner",emg).CornerRadius=UDim.new(0,34)
+local emst = Instance.new("UIStroke",emg); emst.Color=Color3.fromRGB(255,255,255); emst.Transparency=0.88; emst.Thickness=1
+local emc = Instance.new("Frame",em); emc.Size=UDim2.fromScale(1,1); emc.BackgroundTransparency=1; emc.BorderSizePixel=0; emc.ZIndex=22
+local eml = Instance.new("UIListLayout",emc); eml.FillDirection=Enum.FillDirection.Horizontal; eml.VerticalAlignment=Enum.VerticalAlignment.Center; eml.Padding=UDim.new(0,0)
+Instance.new("UIPadding",emc).PaddingLeft=UDim.new(0,20); Instance.new("UIPadding",emc).PaddingRight=UDim.new(0,4)
+
+-- EditMenu Tabs
 local items = {{"Farm",50,34,false},{"Shop",68,35,true},{"Steal",67,34,true},{"Spawn",78,45,true},{"Config",77,44,true},{"Settings",88,55,true}}
-local selectedLabel = nil
-for ei, ed in ipairs(items) do
-	local text, w, tw, hasSep = table.unpack(ed)
-	local a = Instance.new("Frame", emContent); a.Size = UDim2.fromOffset(w,18); a.BackgroundTransparency = 1; a.BorderSizePixel = 0
-	if hasSep then local s = Instance.new("Frame", a); s.Size = UDim2.fromOffset(1,18); s.Position = UDim2.fromOffset(0,0); s.BackgroundColor3 = white; s.BackgroundTransparency = 0.8; s.BorderSizePixel = 0 end
-	local lb = Instance.new("TextLabel", a); lb.Size = UDim2.fromOffset(tw,18); lb.Position = UDim2.fromOffset(hasSep and 17 or 0,0)
-	lb.BackgroundTransparency = 1; lb.FontFace = Font.new("rbxassetid://12187365364"); lb.Text = text; lb.TextSize = 15
-	lb.TextColor3 = ei == 1 and selectedColor or normalColor; lb.TextXAlignment = Enum.TextXAlignment.Left; lb.TextYAlignment = Enum.TextYAlignment.Center
-	if ei == 1 then selectedLabel = lb end
-	local hb = Instance.new("TextButton", a); hb.Size = UDim2.fromScale(1,1); hb.BackgroundTransparency = 1; hb.BorderSizePixel = 0; hb.Text = ""; hb.ZIndex = 22; hb.AutoButtonColor = false
+local selLabel
+for ei,ed in ipairs(items) do
+	local text,w,tw,hs = table.unpack(ed)
+	local a = Instance.new("Frame",emc); a.Size=UDim2.fromOffset(w,18); a.BackgroundTransparency=1; a.BorderSizePixel=0
+	if hs then local s=Instance.new("Frame",a); s.Size=UDim2.fromOffset(1,18); s.BackgroundColor3=Color3.fromRGB(255,255,255); s.BackgroundTransparency=0.8; s.BorderSizePixel=0 end
+	local lb = Instance.new("TextLabel",a); lb.Size=UDim2.fromOffset(tw,18); lb.Position=UDim2.fromOffset(hs and 17 or 0,0)
+	lb.BackgroundTransparency=1; lb.FontFace=Font.new("rbxassetid://12187365364"); lb.Text=text; lb.TextSize=15
+	lb.TextColor3=ei==1 and Color3.fromRGB(255,66,84) or Color3.fromRGB(245,245,245)
+	lb.TextXAlignment=Enum.TextXAlignment.Left; lb.TextYAlignment=Enum.TextYAlignment.Center
+	if ei==1 then selLabel=lb end
+	local hb = Instance.new("TextButton",a); hb.Size=UDim2.fromScale(1,1); hb.BackgroundTransparency=1; hb.BorderSizePixel=0; hb.Text=""; hb.ZIndex=22; hb.AutoButtonColor=false
 	hb.MouseButton1Click:Connect(function()
-		if selectedLabel == lb then return end
-		if selectedLabel then TS:Create(selectedLabel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = normalColor, TextTransparency = 0.3}):Play()
-			task.delay(0.15, function() if selectedLabel then TS:Create(selectedLabel, TweenInfo.new(0.1), {TextTransparency = 0}):Play() end end) end
-		lb.TextColor3 = selectedColor; lb.TextTransparency = 0.3
-		TS:Create(lb, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = selectedColor, TextTransparency = 0}):Play()
-		selectedLabel = lb
-		for _, p in pairs(pages:GetChildren()) do if p:IsA("Frame") then p.Visible = false end end
-		local t = pages:FindFirstChild("Page"..ei); if t then t.Visible = true end
+		if selLabel==lb then return end
+		if selLabel then TS:Create(selLabel,TweenInfo.new(0.25,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{TextColor3=Color3.fromRGB(245,245,245)}):Play() end
+		lb.TextColor3=Color3.fromRGB(255,66,84); selLabel=lb
+		for _,p in pairs(pages:GetChildren()) do if p:IsA("Frame") then p.Visible=false end end
+		local t = pages:FindFirstChild("Page"..ei); if t then t.Visible=true end
 	end)
 end
-local ind = Instance.new("Frame", emContent); ind.Size = UDim2.fromOffset(36,36); ind.BackgroundColor3 = Color3.fromRGB(3,3,3); ind.BackgroundTransparency = 0
-Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
-local ii = Instance.new("ImageLabel", ind); ii.Size = UDim2.fromOffset(24,24); ii.Position = UDim2.fromOffset(6,6)
-ii.BackgroundTransparency = 1; ii.Image = "rbxassetid://103603118195781"; ii.ImageColor3 = white; ii.ScaleType = Enum.ScaleType.Fit; ii.ZIndex = 22
 
--- WindowPill (separate ScreenGui, stays visible when minimized)
-local pillGui = Instance.new("ScreenGui")
-pillGui.Name = "UnAliveUI_Pill"
-pillGui.ResetOnSpawn = false
-pillGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-pillGui.DisplayOrder = 200
-pillGui.IgnoreGuiInset = true
-pillGui.Parent = playerGui
+-- Info Button
+local ind = Instance.new("Frame",emc); ind.Size=UDim2.fromOffset(36,36); ind.BackgroundColor3=Color3.fromRGB(3,3,3)
+Instance.new("UICorner",ind).CornerRadius=UDim.new(1,0)
+local ii = Instance.new("ImageLabel",ind); ii.Size=UDim2.fromOffset(24,24); ii.Position=UDim2.fromOffset(6,6)
+ii.BackgroundTransparency=1; ii.Image="rbxassetid://103603118195781"; ii.ImageColor3=Color3.fromRGB(255,255,255); ii.ScaleType=Enum.ScaleType.Fit; ii.ZIndex=22
 
-local pill = Instance.new("ImageButton")
-pill.Name = "WindowPill"
-pill.AnchorPoint = Vector2.new(0.5, 0)
-pill.AutoButtonColor = false
-pill.BackgroundTransparency = 1
-pill.BorderSizePixel = 0
-pill.Image = "rbxassetid://93520763686656"
-pill.ImageTransparency = 0.5
-pill.Position = UDim2.new(0.5, 0, 0, 10)
-pill.Size = UDim2.fromOffset(180, 5)
-pill.ZIndex = 999
-pill.Parent = pillGui
-Instance.new("UICorner", pill).CornerRadius = UDim.new(1, 0)
+-- WindowPill
+local pgui = Instance.new("ScreenGui"); pgui.Name="UnAliveUI_Pill"; pgui.ResetOnSpawn=false
+pgui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling; pgui.DisplayOrder=200; pgui.IgnoreGuiInset=true; pgui.Parent=pg
+local pill = Instance.new("ImageButton",pgui); pill.Name="WindowPill"; pill.AnchorPoint=Vector2.new(0.5,0)
+pill.AutoButtonColor=false; pill.BackgroundTransparency=1; pill.BorderSizePixel=0
+pill.Image="rbxassetid://93520763686656"; pill.ImageTransparency=0.5
+pill.Position=UDim2.new(0.5,0,0,10); pill.Size=UDim2.fromOffset(180,5); pill.ZIndex=999
+Instance.new("UICorner",pill).CornerRadius=UDim.new(1,0)
 
--- Minimize (Myriad exact)
+-- Minimize
 local mined = false
-local function toggleMinimize()
-	mined = not mined
-	local tY = mined and window.AbsoluteSize.Y * 2 or 0
-	TweenService:Create(window, TweenInfo.new(0.25, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0.5, tY)}):Play()
-	TweenService:Create(guiScale, TweenInfo.new(0.25, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {Scale = mined and 0 or 1}):Play()
+local function toggleMin()
+	mined=not mined; local tY=mined and win.AbsoluteSize.Y*2 or 0
+	TS:Create(win,TweenInfo.new(0.25,Enum.EasingStyle.Exponential,Enum.EasingDirection.Out),{Position=UDim2.new(0.5,0,0.5,tY)}):Play()
+	TS:Create(gs,TweenInfo.new(0.25,Enum.EasingStyle.Exponential,Enum.EasingDirection.Out),{Scale=mined and 0 or 1}):Play()
 end
-
--- WindowPill hover glow + click
 local ct
-pill.MouseEnter:Connect(function()
-	if ct then ct:Cancel() end
-	ct = TweenService:Create(pill, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0.15})
-	ct:Play()
-end)
-pill.MouseLeave:Connect(function()
-	if ct then ct:Cancel() end
-	ct = TweenService:Create(pill, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0.5})
-	ct:Play()
-end)
-pill.MouseButton1Click:Connect(toggleMinimize)
-
--- Wire traffic light buttons
-local exitBtn = titleBar:FindFirstChild("Exit")
-if exitBtn then
-	exitBtn.MouseButton1Click:Connect(function() gui:Destroy(); pillGui:Destroy() end)
-end
-local minBtn = titleBar:FindFirstChild("Minimize")
-if minBtn then
-	minBtn.MouseButton1Click:Connect(toggleMinimize)
-end
+pill.MouseEnter:Connect(function() if ct then ct:Cancel() end; ct=TS:Create(pill,TweenInfo.new(0.4,Enum.EasingStyle.Exponential),{ImageTransparency=0.15}); ct:Play() end)
+pill.MouseLeave:Connect(function() if ct then ct:Cancel() end; ct=TS:Create(pill,TweenInfo.new(0.4,Enum.EasingStyle.Exponential),{ImageTransparency=0.5}); ct:Play() end)
+pill.MouseButton1Click:Connect(toggleMin)
+tb:FindFirstChild("Exit").MouseButton1Click:Connect(function() gui:Destroy(); pgui:Destroy() end)
+tb:FindFirstChild("Minimize").MouseButton1Click:Connect(toggleMin)
 
 print("=== UnAliveUI Main Window ===")
