@@ -167,22 +167,27 @@ local function trailing(parent, x, y, text)
 	return t
 end
 
-local function label(parent, x, y, text)
-	local l = UnAlive:New("Label", {Text = text, TextSize = 11})
-	pl(parent, l, x, y)
-	l.__instance.Size = UDim2.fromOffset(300, 14)
+local function mkLabel(parent, x, y, text, color)
+	local l = Instance.new("TextLabel", parent)
+	l.Size = UDim2.fromOffset(300, 14); l.Position = UDim2.fromOffset(x, y)
+	l.BackgroundTransparency = 1; l.FontFace = Font.new("rbxassetid://12187365364")
+	l.TextSize = 11; l.TextColor3 = color or Color3.fromRGB(245,245,245)
+	l.Text = text; l.TextXAlignment = Enum.TextXAlignment.Left; l.ZIndex = 25
 	return l
 end
 
 -- FARM PAGE
 local farm = pageFrames[1]
-cardc(farm, 4, 4, 472, 50) -- Master
-toggle(farm, 14, 10, false); label(farm, 80, 12, "Auto-Farm"); trailing(farm, 300, 14, "● Running")
-toggle(farm, 350, 10); label(farm, 416, 12, "Expand")
+toggle(farm, 14, 4, false); mkLabel(farm, 80, 6, "Auto-Farm")
+toggle(farm, 175, 4); mkLabel(farm, 241, 6, "Expand")
+toggle(farm, 310, 4); mkLabel(farm, 376, 6, "Daily")
+toggle(farm, 14, 34); mkLabel(farm, 80, 36, "Pot")
+toggle(farm, 175, 34); mkLabel(farm, 241, 36, "Sprinkler")
+toggle(farm, 310, 34); mkLabel(farm, 376, 36, "Water")
 
 -- SHOP PAGE
 local shop = pageFrames[2]
-toggle(shop, 14, 10, false); label(shop, 80, 12, "Auto-Buy"); pulldown(shop, 200, 4, "Seeds", {"All","Wheat","Corn"})
+toggle(shop, 14, 4, false); mkLabel(shop, 80, 6, "Auto-Buy"); pulldown(shop, 200, 4, "Seeds", {"All","Wheat","Corn"})
 
 print("=== Gag2 Complete Layout ===")
 
